@@ -12,6 +12,7 @@ export class PanchangService {
 
   getPanchang(date: Date): object {
     this.getAndAssignLocationObj(this.panchangObj);
+    this.panchangObj["relativeMothionOffsets"] = [0.25, 0.50, 0.75, 1.00];
     this.panchangObj["date"] = this.getDateObj(date);
     this.panchangObj["observer"] = this.getAstroObserver(this.panchangObj['locationObj']['lat'], this.panchangObj['locationObj']['lon'], this.panchangObj['locationObj']['elevation']);
     this.panchangObj["sunRiseSet"] = this.getSunRiseSet(this.panchangObj["observer"], this.panchangObj["date"]["dateWithZeroHours"]);
@@ -19,38 +20,44 @@ export class PanchangService {
     this.panchangObj["vedicDay"] = this.getWaar(this.panchangObj['date']['dateObj'], this.panchangObj['sunRiseSet']['rise']['date']);
     this.panchangObj["sunLatLong"] = this.getSunLatLong(this.panchangObj['date']['astroDate']);
     this.panchangObj["moonLatLong"] = this.getMoonLatLong(this.panchangObj['date']['astroDate']);
-    this.panchangObj["tithi"] = this.getTithi(this.panchangObj["date"], this.panchangObj["observer"], this.panchangObj['sunRiseSet']['rise']['date'], this.panchangObj['sunLatLong']['elon'], this.panchangObj['moonLatLong']['elon']);
+    this.panchangObj['sunRiseAstotimeObj'] = this.getAstroDate(this.panchangObj['sunRiseSet']['rise']['date']);
+    this.panchangObj["tithi"] = this.getTithi(this.panchangObj["date"], this.panchangObj['sunRiseAstotimeObj'], this.panchangObj['sunLatLong']['elon'], this.panchangObj['moonLatLong']['elon'], this.panchangObj["relativeMothionOffsets"]);
     return this.panchangObj;
   }
 
 
-  getTithi(dateObj: { [key: string]: any }, observer: AstroEngine.Observer, sunRiseTime: Date, currentSunLong: number, currentMoonLong: number): object {
+  getTithi(dateObj: { [key: string]: any }, sunRiseAstroTime: AstroEngine.AstroTime, currentSunLong: number, currentMoonLong: number, offsets: Array<number>): object {
     let tithiObj: { [key: string]: any } = {};
-    let sunRiseAsrtoTimeObj = this.getAstroDate(sunRiseTime);
-    tithiObj['phase'] = Math.abs((currentMoonLong - currentSunLong) % 360); //360 value
-    tithiObj['tithi'] = Math.ceil(tithiObj['phase'] / 12);  // 30 days
-    tithiObj['degreesLeft'] = (tithiObj['tithi'] * 12) - tithiObj['phase'];
+    tithiObj['substituionValue'] = (currentMoonLong - currentSunLong);
+    tithiObj['phase'] = tithiObj['substituionValue'] < 0 ? (360 + tithiObj['substituionValue']) : tithiObj['substituionValue'];
+    tithiObj['tithi'] = Math.ceil(tithiObj['phase'] / 12);
+    tithiObj['degreesLeft'] = (tithiObj['tithi'] * 12) - tithiObj['phase'];  /* <-- degree in radian */
 
-    let offsets = [0.25, 0.5, 0.75, 1.0];
-    let relative_motion = offsets.map((t) => {
-      return Math.abs(Math.abs((this.getMoonLatLong(sunRiseAsrtoTimeObj.AddDays(t))['elon'] - this.getMoonLatLong(sunRiseAsrtoTimeObj)['elon']) % 360) - Math.abs((this.getSunLatLong(sunRiseAsrtoTimeObj.AddDays(t))['elon'] - this.getSunLatLong(sunRiseAsrtoTimeObj)['elon']) % 360))
+    let relative_motion: Array<number> = offsets.map((t) => {
+      let moonRelativeSubstitution: number = this.getMoonLatLong(sunRiseAstroTime.AddDays(t))['elon'] - this.getMoonLatLong(sunRiseAstroTime)['elon'];
+      let sunRelativeSubstitution: number = this.getSunLatLong(sunRiseAstroTime.AddDays(t))['elon'] - this.getSunLatLong(sunRiseAstroTime)['elon'];
+      moonRelativeSubstitution = moonRelativeSubstitution < 0 ? (moonRelativeSubstitution + 360) : moonRelativeSubstitution;
+      sunRelativeSubstitution = sunRelativeSubstitution < 0 ? (sunRelativeSubstitution + 360) : sunRelativeSubstitution;
+      let relativeSubstitution: number = moonRelativeSubstitution - sunRelativeSubstitution;
+      return relativeSubstitution < 0 ? (relativeSubstitution + 360) : relativeSubstitution;
     });
 
-    console.log('off difference...', relative_motion);
-    let approx_end = this.inverseLagrange(offsets, relative_motion, tithiObj['degreesLeft']) * 24;
-    tithiObj['tithiEnd'] = new Date(dateObj['timeStamp'] + this.convertDegreesToMilliseconds(approx_end)['millisec']);
+    let approx_end: number = this.inverseLagrange(offsets, relative_motion, tithiObj['degreesLeft']) * 24; /* <-- radian to hour */
+    tithiObj['tithiEnd'] = new Date(dateObj['timeStamp'] + this.convertHoursToMilliseconds(approx_end)['millisec']);
 
-
-    //Check for skipped tithi
-    let nextPhase = this.getMoonLatLong(sunRiseAsrtoTimeObj.AddDays(1))['elon'];
-    let nextTithi = Math.ceil(nextPhase / 12);
-    let isSkipped = (nextTithi - tithiObj['tithi']) % 30 > 1;
+    /* check for skipped tithi -- not validated */
+    let nextPhase: number = this.getMoonLatLong(sunRiseAstroTime.AddDays(1))['elon'] - this.getSunLatLong(sunRiseAstroTime.AddDays(1))['elon'];
+    tithiObj['substituionValueSkipCheck'] = nextPhase;
+    nextPhase = nextPhase < 0 ? (360 + nextPhase) : nextPhase;
+    let nextTithi = (Math.ceil(nextPhase / 12) - tithiObj['tithi']);
+    nextTithi = nextTithi < 0 ? (nextTithi + 30) : nextTithi;
+    let isSkipped: boolean = (nextTithi % 30) > 1;
     if (isSkipped) {
-      console.log('tithi is skipped for:', dateObj['dateObj']);
-      tithiObj['tithi'] = tithiObj['tithi'] + 1;
+      tithiObj['phase'] = nextPhase;
+      tithiObj['tithi'] = tithiObj['tithi'] + 1 % 30;
       tithiObj['degreesLeft'] = (tithiObj['tithi'] * 12) - tithiObj['phase'];
       approx_end = this.inverseLagrange(offsets, relative_motion, tithiObj['degreesLeft']) * 24;
-      tithiObj['tithiEnd'] = new Date(dateObj['timeStamp'] + this.convertDegreesToMilliseconds(approx_end)['millisec']);
+      tithiObj['tithiEnd'] = new Date(dateObj['timeStamp'] + this.convertHoursToMilliseconds(approx_end)['millisec']);
     }
 
     tithiObj['paksha'] = tithiObj['tithi'] > 15 ? 2 : 1;
@@ -58,17 +65,17 @@ export class PanchangService {
   }
 
 
-  convertDegreesToMilliseconds(degrees: number): { millisec: number, Hr_Min_Sec: Array<number> } {
-    let d = Math.floor(degrees);
-    let mins = (degrees - d) * 60;
-    let m = Math.floor(mins);
-    let s = (mins - m) * 60;
-    return { millisec: (d * 60 * 60 * 1000) + (m * 60 * 1000) + (s * 1000), Hr_Min_Sec: [d, m, s] };
+  convertHoursToMilliseconds(hours: number): { millisec: number, Hr_Min_Sec: Array<number> } {
+    let h: number = Math.floor(hours);
+    let mins: number = (hours - h) * 60;
+    let m: number = Math.floor(mins);
+    let s: number = (mins - m) * 60;
+    return { millisec: (h * 60 * 60 * 1000) + (m * 60 * 1000) + (s * 1000), Hr_Min_Sec: [h, m, s] };
   }
 
   inverseLagrange(x: Array<number>, y: Array<number>, ya: number): number {
     // Given two lists x and y, find the value of x = xa when y = ya, i.e., f(xa) = ya;
-    let denom, numer, total;
+    let denom: number, numer: number, total: number;
     total = 0;
     if (x.length === y.length) {
       for (let i = 0; i < x.length; i++) {
