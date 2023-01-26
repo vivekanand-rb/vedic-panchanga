@@ -12,28 +12,54 @@ export class PanchangService {
 
   getPanchang(date: Date): object {
     this.getAndAssignLocationObj(this.panchangObj);
-    this.panchangObj["relativeMothionOffsets"] = [0.25, 0.50, 0.75, 1.00];
+    this.panchangObj["relativeMothionOffsets"] = [0.00, 0.25, 0.50, 0.75, 1.00];
     this.panchangObj["date"] = this.getDateObj(date);
     this.panchangObj["observer"] = this.getAstroObserver(this.panchangObj['locationObj']['lat'], this.panchangObj['locationObj']['lon'], this.panchangObj['locationObj']['elevation']);
     this.panchangObj["sunRiseSet"] = this.getSunRiseSet(this.panchangObj["observer"], this.panchangObj["date"]["dateWithZeroHours"]);
     this.panchangObj["moonRiseSet"] = this.getMoonRiseSet(this.panchangObj["observer"], this.panchangObj['sunRiseSet']['rise']['date'])
-    this.panchangObj["vedicDay"] = this.getWaar(this.panchangObj['date']['dateObj'], this.panchangObj['sunRiseSet']['rise']['date']);
+    this.panchangObj["vedicDay"] = this.getVaara(this.panchangObj['date']['dateObj'], this.panchangObj['sunRiseSet']['rise']['date']);
     this.panchangObj["sunLatLong"] = this.getSunLatLong(this.panchangObj['date']['astroDate']);
     this.panchangObj["moonLatLong"] = this.getMoonLatLong(this.panchangObj['date']['astroDate']);
     this.panchangObj['sunRiseAstotimeObj'] = this.getAstroDate(this.panchangObj['sunRiseSet']['rise']['date']);
-    this.panchangObj["tithi"] = this.getTithi(this.panchangObj["date"], this.panchangObj['sunRiseAstotimeObj'], this.panchangObj['sunLatLong']['elon'], this.panchangObj['moonLatLong']['elon'], this.panchangObj["relativeMothionOffsets"]);
+    this.panchangObj["tithiObj"] = this.getTithi(this.panchangObj["date"], this.panchangObj['sunRiseAstotimeObj'], this.panchangObj['sunLatLong']['elon'], this.panchangObj['moonLatLong']['elon'], this.panchangObj["relativeMothionOffsets"].slice(1));
+    this.panchangObj["nakshatraObj"] = this.getNakshatra(this.panchangObj["date"], this.panchangObj['sunRiseSet']['rise']['date'], this.panchangObj['sunRiseAstotimeObj'], this.panchangObj["relativeMothionOffsets"]);
     return this.panchangObj;
   }
 
+  getNakshatra(dateObj: { [key: string]: any }, sunRiseDate: Date, sunRiseAstroTime: AstroEngine.AstroTime, offsets: Array<number>): { [key: string]: any } {
+    let nakshatraObj: { [key: string]: any } = {};
+    let relativeLongitudes: Array<number> = offsets.map((t) => {
+      let moonRelativeSubstitution: number = this.getMoonLatLong(sunRiseAstroTime.AddDays(t))['elon'] - this.getAayamsha(sunRiseDate);
+      moonRelativeSubstitution = moonRelativeSubstitution < 0 ? (moonRelativeSubstitution + 360) : moonRelativeSubstitution;
+      return moonRelativeSubstitution;
+    });
 
-  getTithi(dateObj: { [key: string]: any }, sunRiseAstroTime: AstroEngine.AstroTime, currentSunLong: number, currentMoonLong: number, offsets: Array<number>): object {
+    nakshatraObj['nakshatra'] = Math.ceil(relativeLongitudes[0] * 27 / 360);
+    relativeLongitudes = this.unwrapAngles(relativeLongitudes);
+    let approx_end: number = this.inverseLagrange(offsets, relativeLongitudes, nakshatraObj['nakshatra'] * 360 / 27) * 24;
+    nakshatraObj['nakshatraEndTime'] = new Date(sunRiseDate.getTime() + this.convertHoursToMilliseconds(approx_end)['millisec']);
+
+    let nextNakshatra: number = Math.ceil(relativeLongitudes[relativeLongitudes.length - 1] * 27 / 360);
+    nakshatraObj['substituionValueSkipCheck'] = nextNakshatra;
+    nextNakshatra = nextNakshatra < 0 ? (nextNakshatra + 27) : nextNakshatra;
+    let isSkipped: boolean = (nextNakshatra - nakshatraObj['nakshatra']) % 27 > 1;
+    if (isSkipped) {
+      debugger
+      nakshatraObj['nakshatra'] = nakshatraObj['nakshatra'] + 1;
+      approx_end = this.inverseLagrange(offsets, relativeLongitudes, nakshatraObj['nakshatra'] * 360 / 27) * 24;
+      nakshatraObj['nakshatraEndTime'] = new Date(dateObj['timeStamp'] + this.convertHoursToMilliseconds(approx_end)['millisec']);
+    }
+    return nakshatraObj;
+  }
+
+  getTithi(dateObj: { [key: string]: any }, sunRiseAstroTime: AstroEngine.AstroTime, currentSunLong: number, currentMoonLong: number, offsets: Array<number>): { [key: string]: any } {
     let tithiObj: { [key: string]: any } = {};
     tithiObj['substituionValue'] = (currentMoonLong - currentSunLong);
     tithiObj['phase'] = tithiObj['substituionValue'] < 0 ? (360 + tithiObj['substituionValue']) : tithiObj['substituionValue'];
     tithiObj['tithi'] = Math.ceil(tithiObj['phase'] / 12);
     tithiObj['degreesLeft'] = (tithiObj['tithi'] * 12) - tithiObj['phase'];  /* <-- degree in radian */
 
-    let relative_motion: Array<number> = offsets.map((t) => {
+    let relativeMotion: Array<number> = offsets.map((t) => {
       let moonRelativeSubstitution: number = this.getMoonLatLong(sunRiseAstroTime.AddDays(t))['elon'] - this.getMoonLatLong(sunRiseAstroTime)['elon'];
       let sunRelativeSubstitution: number = this.getSunLatLong(sunRiseAstroTime.AddDays(t))['elon'] - this.getSunLatLong(sunRiseAstroTime)['elon'];
       moonRelativeSubstitution = moonRelativeSubstitution < 0 ? (moonRelativeSubstitution + 360) : moonRelativeSubstitution;
@@ -42,7 +68,7 @@ export class PanchangService {
       return relativeSubstitution < 0 ? (relativeSubstitution + 360) : relativeSubstitution;
     });
 
-    let approx_end: number = this.inverseLagrange(offsets, relative_motion, tithiObj['degreesLeft']) * 24; /* <-- radian to hour */
+    let approx_end: number = this.inverseLagrange(offsets, relativeMotion, tithiObj['degreesLeft']) * 24; /* <-- radian to hour */
     tithiObj['tithiEnd'] = new Date(dateObj['timeStamp'] + this.convertHoursToMilliseconds(approx_end)['millisec']);
 
     /* check for skipped tithi -- not validated */
@@ -53,10 +79,11 @@ export class PanchangService {
     nextTithi = nextTithi < 0 ? (nextTithi + 30) : nextTithi;
     let isSkipped: boolean = (nextTithi % 30) > 1;
     if (isSkipped) {
+      debugger
       tithiObj['phase'] = nextPhase;
       tithiObj['tithi'] = tithiObj['tithi'] + 1 % 30;
       tithiObj['degreesLeft'] = (tithiObj['tithi'] * 12) - tithiObj['phase'];
-      approx_end = this.inverseLagrange(offsets, relative_motion, tithiObj['degreesLeft']) * 24;
+      approx_end = this.inverseLagrange(offsets, relativeMotion, tithiObj['degreesLeft']) * 24;
       tithiObj['tithiEnd'] = new Date(dateObj['timeStamp'] + this.convertHoursToMilliseconds(approx_end)['millisec']);
     }
 
@@ -64,6 +91,22 @@ export class PanchangService {
     return tithiObj;
   }
 
+
+  unwrapAngles(degreeAngles: Array<number>): Array<number> {
+    for (let i = 1; i < degreeAngles.length; i++) {
+      if (degreeAngles[i] < degreeAngles[i - 1]) {
+        degreeAngles[i] += 360;
+      }
+    }
+    return degreeAngles;
+  }
+
+
+  getAayamsha(sunRiseDate: Date, correctionIndex: number = 0): number {
+    const correctionSystem = [{ '0': 'lahiri', 'startYear': 285, 'movement': 50.2791 }, { '0': 'lahiri', 'startYear': 291, 'movement': 50.2388475 }, { '2': 'raman', 'startYear': 297, 'movement': 50.33 }];
+    const year = sunRiseDate.getFullYear() - correctionSystem[correctionIndex]['startYear'];
+    return ((year * correctionSystem[correctionIndex]['movement']) / 60) / 60;
+  }
 
   convertHoursToMilliseconds(hours: number): { millisec: number, Hr_Min_Sec: Array<number> } {
     let h: number = Math.floor(hours);
@@ -93,7 +136,7 @@ export class PanchangService {
   }
 
 
-  getWaar(date: Date, sunRiseDate: Date): number {
+  getVaara(date: Date, sunRiseDate: Date): number {
     let day = date.getDay() + 1;
     if (date.getTime() < sunRiseDate.getTime()) {
       day = day - 1;
