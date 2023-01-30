@@ -17,7 +17,7 @@ export class PanchangService {
     this.panchangObj["observer"] = this.getAstroObserver(this.panchangObj['locationObj']['lat'], this.panchangObj['locationObj']['lon'], this.panchangObj['locationObj']['elevation']);
     this.panchangObj["sunRiseSet"] = this.getSunRiseSet(this.panchangObj["observer"], this.panchangObj["date"]["dateWithZeroHours"]);
     this.panchangObj["moonRiseSet"] = this.getMoonRiseSet(this.panchangObj["observer"], this.panchangObj['sunRiseSet']['rise']['date'])
-    this.panchangObj["vedicDay"] = this.getVaara(this.panchangObj['date']['dateObj'], this.panchangObj['sunRiseSet']['rise']['date']);
+    this.panchangObj["vedicDayObj"] = this.getVaara(this.panchangObj['date']['dateObj'], this.panchangObj['sunRiseSet']['rise']['date']);
     this.panchangObj["sunLatLong"] = this.getSunLatLong(this.panchangObj['date']['astroDate']);
     this.panchangObj["moonLatLong"] = this.getMoonLatLong(this.panchangObj['date']['astroDate']);
     this.panchangObj['sunRiseAstotimeObj'] = this.getAstroDate(this.panchangObj['sunRiseSet']['rise']['date']);
@@ -87,7 +87,7 @@ export class PanchangService {
       let predt = new Date(dateWithZeroHour.getTime());
       predt.setDate(predt.getDate() - 1);
       vedicTime['previousSunRise'] = this.getSunRiseSet(observer, predt);
-      dt = date.getTime() - vedicTime['previousSunRise']['date'].getTime();
+      dt = date.getTime() - vedicTime['previousSunRise']['rise']['date'].getTime();
     }
     /* Note: 1 ghati = 24 min, 1 pal = 24 sec, 2.5 vipal = 1 sec */
     const min = dt / 60000;
@@ -269,12 +269,12 @@ export class PanchangService {
   }
 
 
-  getVaara(date: Date, sunRiseDate: Date): number {
+  getVaara(date: Date, sunRiseDate: Date): { [key: string]: any } {
     let day = date.getDay() + 1;
     if (date.getTime() < sunRiseDate.getTime()) {
       day = day - 1;
     }
-    return day;
+    return {day};
   }
 
   getSunLatLong(date: AstroEngine.AstroTime): { [key: string]: any } {
@@ -340,11 +340,15 @@ export class PanchangService {
 
   async getAndAssignLocationObj(assignableObjRef: { [key: string]: any }) {
     if (!sessionStorage.getItem('locationObject')) {
-      const loacationResponse = await firstValueFrom(this._http.get("http://ip-api.com/json").pipe(switchMap(async (response: any) => {
-        const eleVationResponse: any = await firstValueFrom(this._http.get("https://api.open-elevation.com/api/v1/lookup?locations=" + response['lat'] + "," + response['lon']));
-        response['elevation'] = eleVationResponse['results'][0]['elevation'] / 1000;
-        return response;
-      })));
+      const loacationResponse:any = await firstValueFrom(this._http.get("http://ip-api.com/json"));
+      // .pipe(switchMap(async (response: any) => {
+        // debugger
+        // const eleVationResponse: any = await firstValueFrom(this._http.get("https://api.open-elevation.com/api/v1/lookup?locations=" + response['lat'] + "," + response['lon']));
+        // response['elevation'] = eleVationResponse['results'][0]['elevation'] / 1000;
+        // return response;
+      // })));
+      const eleVationResponse: any = await firstValueFrom(this._http.get("https://api.open-elevation.com/api/v1/lookup?locations=" + loacationResponse['lat'] + "," + loacationResponse['lon']));
+      loacationResponse['elevation'] =  eleVationResponse['results'] ? ( eleVationResponse['results'][0]['elevation'] / 1000) : 0.002;
       sessionStorage.setItem('locationObject', JSON.stringify(loacationResponse));
       assignableObjRef["locationObj"] = loacationResponse;
     } else {
