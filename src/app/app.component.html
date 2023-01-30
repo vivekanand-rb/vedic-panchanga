@@ -2,7 +2,7 @@
 <table class="table table-bordered px-5">
   <thead>
     <tr>
-      <th colspan="2" class="text-center" style="color: rgb(172, 66, 83);">{{panchangObject['date']['dateObj']}}</th>
+      <th colspan="2" class="text-center" style="color: rgb(172, 66, 83);">{{panchangObject['date']['dateObj']}} <span style="margin-left: 3%;"><button (click)="getView()">Refresh</button></span></th>
     </tr>
   </thead>
   <tbody>
@@ -40,51 +40,51 @@
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Tithi</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['tithi']}}</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['tithiObj']['tithiMap']}}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{panchangObject['tithiObj']['tithiEnd']}}</span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Nakshatra</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['nakshatra']}}</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['nakshatraObj']['nakshatraMap'] }}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{panchangObject['nakshatraObj']['nakshatraEndTime']}}</span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Nakshatra Charana</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['nakshatraPada']}}</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['nakshatraObj']['nakshatraCharanaMap']}}</span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Yoga</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['yoga']}}</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['yogaObj']['yogaMap']}}</span> <span class="px-1" style="color: rgb(186, 84, 84);">{{panchangObject['yogaObj']['yogaEndTime']}}</span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Karana</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['karana']}}</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['karanaObj']['karanaMap']}}</span> <span class="px-1" style="color: rgb(186, 84, 84);">{{panchangObject['karanaObj']['karanaEnd']}}</span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Sun Sign</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['sunSign']}}</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['rashiObj']['sunRashiMap']}}</span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Moon Sign</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['moonSign']}}</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['rashiObj']['moonRashiMap']}}</span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Month</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['maah']}}</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['masaMap']}}</span></td>
     </tr>
     <tr>
-      <td style="text-align: right; width: 50%;">Season</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['ritu']}}</span></td>
+      <td style="text-align: right; width: 50%;">Ritu</td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['rituMap']}}</span></td>
     </tr>
     <tr>
-      <td style="text-align: right; width: 50%;">Hemisphere</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['ayana']}}</span></td>
+      <td style="text-align: right; width: 50%;">Vedic Ayana</td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['ayanaMap']}}</span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Vikaram Samvat</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['samvat']['vikramSamvat']}}</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['calSystemObj']['vikramSamvat']}}</span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Saka Samvat</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['samvat']['sakaSamvat']}}</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['calSystemObj']['sakaSamvat']}}</span></td>
     </tr>
   </tbody>
 </table>

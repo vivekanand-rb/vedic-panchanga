@@ -61,14 +61,30 @@ export class PanchangService {
     let lastNewMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(0, date, -(tithi + 2));
     let nextNewMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(0, date, (30 - tithi) + 2);
     if (lastNewMoon && nextNewMoon) {
-      let currentSolarMonth: number = this.getRashi(AstroEngine.Body.Moon, lastNewMoon['date'], lastNewMoon);
-      let nextSolarMonth: number = this.getRashi(AstroEngine.Body.Moon, lastNewMoon['date'], nextNewMoon);
-      masaObj['isLeapMonth'] = currentSolarMonth === nextSolarMonth;
-      masaObj['masa'] = currentSolarMonth + 1;
+      let currentLunarMonth: number = this.getRashi(AstroEngine.Body.Moon, lastNewMoon['date'], lastNewMoon);
+      let nextLunarMonth: number = this.getRashi(AstroEngine.Body.Moon, lastNewMoon['date'], nextNewMoon);
+      masaObj['isLeapMonth'] = currentLunarMonth === nextLunarMonth;
+      masaObj['masa'] = currentLunarMonth + 1;
       masaObj['masa'] = masaObj['masa'] > 12 ? (masaObj['masa'] % 12) : masaObj['masa'];
+      masaObj['ritu'] = Math.ceil(masaObj['masa']/2);
+      masaObj['ayana'] = this.getAyana(date);
     }
     return masaObj;
   }
+
+  getAyana(date: Date): number{
+    let astroSeasons = AstroEngine.Seasons(date.getFullYear());
+    if(date.getTime() >= astroSeasons['jun_solstice']['date'].getTime()){
+      if(date.getTime() >= astroSeasons['dec_solstice']['date'].getTime()){
+        return 1;
+      }else{
+        return 2;
+      }
+    }else{
+      return 1;
+    }
+  }
+
 
 
 
@@ -110,6 +126,7 @@ export class PanchangService {
     });
 
     nakshatraObj['nakshatra'] = Math.ceil(relativeLongitudes[0] * 27 / 360);
+    nakshatraObj['nakshatraCharana'] = Math.ceil(((relativeLongitudes[0] - Math.floor(relativeLongitudes[0]))*800) / 200);
     relativeLongitudes = this.unwrapAngles(relativeLongitudes);
     let approx_end: number = this.inverseLagrange(offsets, relativeLongitudes, nakshatraObj['nakshatra'] * 360 / 27) * 24;
     nakshatraObj['nakshatraEndTime'] = new Date(sunRiseDate.getTime() + this.convertHoursToMilliseconds(approx_end)['millisec']);
