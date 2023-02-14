@@ -36,27 +36,43 @@
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Paksha</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['tithiObj']['pakshaMap']}}</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['tithiObj'][0]['pakshaMap']}}</span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Tithi</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['tithiObj']['tithiMap']}}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{panchangObject['tithiObj']['tithiEnd']}}</span></td>
+      <td style="width: 50%;">
+        <div *ngFor="let tithi of panchangObject['tithiObj']">
+         <td><span class="px-1" style="color: green;">{{tithi['tithiMap']}}</span> <span class="px-1" style="color: rgb(186, 84, 84);">{{tithi['tithiEnd']}}</span></td> <br />
+        </div>
+      </td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Nakshatra</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['nakshatraObj']['nakshatraMap'] }}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{panchangObject['nakshatraObj']['nakshatraEndTime']}}</span></td>
+      <td style="width: 50%;">
+      <div *ngFor="let nakshatra of panchangObject['nakshatraObj']">
+        <td><span class="px-1" style="color: green;">{{nakshatra['nakshatraMap'] }}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{nakshatra['nakshatraEndTime']}}</span></td><br/>
+      </div>
+      </td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Nakshatra Charana</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['nakshatraObj']['nakshatraCharanaMap']}}</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['nakshatraObj'][0]['nakshatraCharanaMap']}}</span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Yoga</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['yogaObj']['yogaMap']}}</span> <span class="px-1" style="color: rgb(186, 84, 84);">{{panchangObject['yogaObj']['yogaEndTime']}}</span></td>
+      <td style="width: 50%;">
+        <div *ngFor="let yoga of panchangObject['yogaObj']">
+          <td><span class="px-1" style="color: green;">{{yoga['yogaMap'] }}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{yoga['yogaEndTime']}}</span></td><br/>
+        </div>
+      </td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Karana</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['karanaObj']['karanaMap']}}</span> <span class="px-1" style="color: rgb(186, 84, 84);">{{panchangObject['karanaObj']['karanaEnd']}}</span></td>
+      <td style="width: 50%;">
+        <div *ngFor="let karana of panchangObject['karanaObj']">
+          <td><span class="px-1" style="color: green;">{{karana['karanaMap'] }}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{karana['karanaEndTime']}}</span></td><br/>
+        </div>
+      </td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Sun Sign</td>

@@ -15,8 +15,8 @@ export class AppComponent implements OnInit {
     1: 'Ashwini', 2: 'Bharani', 3: 'Krittika', 4: 'Rohini', 5: 'Mrigashira',
     6: 'Ardra', 7: 'Punarvasu', 8: 'Pushya', 9: 'Ashlesha', 10: 'Magha',
     11: 'Purva Phalguni', 12: 'Uttara Phalguni', 13: 'Hasta', 14: 'Chitra',
-    15: 'Swati', 16: 'Vishaka', 17: 'Anurada', 18: 'Jyeshta', 19: 'Mula', 20: 'Purva Ashadha',
-    21: 'Uttara Ashadha', 22: 'Shravana', 23: 'Dhanishta', 24: 'Shatabhishak',
+    15: 'Swati', 16: 'Vishakha', 17: 'Anuradha', 18: 'Jyeshtha', 19: 'Mula', 20: 'Purva Ashadha',
+    21: 'Uttara Ashadha', 22: 'Shravana', 23: 'Dhanishtha', 24: 'Shatabhishak',
     25: 'Purva Bhadrapada', 26: 'Uttara Bhadrapada', 27: 'Revati'
   };
   charana: any = { 1 : 'Parthama Charana', 2: 'Dwitiya Charana', 3: 'Tritiya Charana', 4: 'Chaturtha Charana'}
@@ -32,15 +32,15 @@ export class AppComponent implements OnInit {
   }
   paksha:any = {1:'Sukla Paksha', 2: 'Krishna Paksha'};
   
-  karana:any = ['Bav', 'Balav', 'Kaulav', 'Taytil', 'Gar', 'Vanij', 'Vishti',
-  'Bav', 'Balav', 'Kaulav', 'Taytil', 'Gar', 'Vanij', 'Vishti',
-  'Bav', 'Balav', 'Kaulav', 'Taytil', 'Gar', 'Vanij', 'Vishti',
-  'Bav', 'Balav', 'Kaulav', 'Taytil', 'Gar', 'Vanij', 'Vishti',
+  karana:any = ['Bava', 'Balava', 'Kaulava', 'Taytila', 'Garaja', 'Vanija', 'Vishti',
+  'Bava', 'Balava', 'Kaulava', 'Taytila', 'Garaja', 'Vanija', 'Vishti',
+  'Bava', 'Balava', 'Kaulava', 'Taytila', 'Garaja', 'Vanija', 'Vishti',
+  'Bava', 'Balava', 'Kaulava', 'Taytila', 'Garaja', 'Vanija', 'Vishti',
   'Shakuni', 'Chaturshpad',
-  'Bav', 'Balav', 'Kaulav', 'Taytil', 'Gar', 'Vanij', 'Vishti',
-  'Bav', 'Balav', 'Kaulav', 'Taytil', 'Gar', 'Vanij', 'Vishti',
-  'Bav', 'Balav', 'Kaulav', 'Taytil', 'Gar', 'Vanij', 'Vishti',
-  'Bav', 'Balav', 'Kaulav', 'Taytil', 'Gar', 'Vanij', 'Vishti',
+  'Bava', 'Balava', 'Kaulava', 'Taytila', 'Garaja', 'Vanija', 'Vishti',
+  'Bava', 'Balava', 'Kaulava', 'Taytila', 'Garaja', 'Vanija', 'Vishti',
+  'Bava', 'Balava', 'Kaulava', 'Taytila', 'Garaja', 'Vanija', 'Vishti',
+  'Bava', 'Balava', 'Kaulava', 'Taytila', 'Garaja', 'Vanija', 'Vishti',
    'Nag', 'Kistughan'];
 
   yoga:any = {
@@ -68,12 +68,10 @@ export class AppComponent implements OnInit {
   this.panchangObject = obj;
   this.panchangObject['date']['dayMap'] = this.days[(obj['date']['day']+1)];
   this.panchangObject['vedicDayObj']['vedicDayMap'] = this.vedicDays[obj['vedicDayObj']['day']];
-  this.panchangObject['tithiObj']['pakshaMap'] = this.paksha[obj['tithiObj']['paksha']];
-  this.panchangObject['tithiObj']['tithiMap'] = this.tithi[obj['tithiObj']['tithi']];
-  this.panchangObject['nakshatraObj']['nakshatraMap'] = this.nakshatra[obj['nakshatraObj']['nakshatra']];
-  this.panchangObject['nakshatraObj']['nakshatraCharanaMap'] = this.charana[obj['nakshatraObj']['nakshatraCharana']];
-  this.panchangObject['yogaObj']['yogaMap'] = this.yoga[obj['yogaObj']['yog']];
-  this.panchangObject['karanaObj']['karanaMap'] = this.karana[obj['karanaObj']['karana']];
+  this.panchangObject['tithiObj'].forEach((element:any) => {  element['pakshaMap'] = this.paksha[element['paksha']]; element['tithiMap'] = this.tithi[element['tithi']]; });
+  this.panchangObject['nakshatraObj'].forEach((element:any) => {  element['nakshatraMap'] = this.nakshatra[element['nakshatra']]; element['nakshatraCharanaMap'] = this.charana[element['nakshatraCharana']]; });
+  this.panchangObject['yogaObj'].forEach((element:any) => {  element['yogaMap'] = this.yoga[element['yog']]; });
+  this.panchangObject['karanaObj'].forEach((element:any) => {  element['karanaMap'] = this.karana[element['karana']]; });
   this.panchangObject['rashiObj']['moonRashiMap'] = this.rashi[obj['rashiObj']['moon']];
   this.panchangObject['rashiObj']['sunRashiMap'] = this.rashi[obj['rashiObj']['sun']];
   this.panchangObject['masaObj']['masaMap'] = this.masa[obj['masaObj']['masa']];
