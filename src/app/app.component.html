@@ -20,7 +20,11 @@
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Day Duration</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['dayDuration']}} Hrs.</span></td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['dayDuration']['dayDurationString']}} </span></td>
+    </tr>
+    <tr>
+      <td style="text-align: right; width: 50%;">Night Duration</td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['dayDuration']['nightDurationString']}} </span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Weekday</td>
@@ -76,11 +80,19 @@
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Sun Sign</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['rashiObj']['sunRashiMap']}}</span></td>
+      <td style="width: 50%;">
+        <div *ngFor="let rashi of panchangObject['rashiObj']['sun']">
+          <td><span class="px-1" style="color: green;">{{rashi['sunRashiMap'] }}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{rashi['rashiEndTime']}}</span></td><br/>
+        </div>
+      </td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Moon Sign</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['rashiObj']['moonRashiMap']}}</span></td>
+      <td style="width: 50%;">
+        <div *ngFor="let rashi of panchangObject['rashiObj']['moon']">
+          <td><span class="px-1" style="color: green;">{{rashi['moonRashiMap'] }}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{rashi['rashiEndTime']}}</span></td><br/>
+        </div>
+      </td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Month</td>

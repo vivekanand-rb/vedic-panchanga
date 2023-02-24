@@ -19,31 +19,31 @@ export class PanchangService {
     this.panchangObj["sunRiseSet"] = this.getSunRiseSet(this.panchangObj["observer"], this.panchangObj["date"]["dateWithZeroHours"]);
     this.panchangObj["moonRiseSet"] = this.getMoonRiseSet(this.panchangObj["observer"], this.panchangObj['sunRiseSet']['rise']['date'])
     this.panchangObj["vedicDayObj"] = this.getVaara(this.panchangObj['date']['dateObj'], this.panchangObj['sunRiseSet']['rise']['date']);
+    this.panchangObj["dayDuration"] = this.getDayDuration(this.panchangObj['sunRiseSet']['rise']['date'], this.panchangObj['sunRiseSet']['set']['date']);
+    this.panchangObj["vedicTimeObj"] = this.getVedicTime(this.panchangObj['sunRiseSet']['rise']['date'], this.panchangObj["date"]['dateObj'], this.panchangObj["date"]['dateWithZeroHours'], this.panchangObj["observer"]);
     this.panchangObj["sunLatLong"] = this.getSunLatLong(this.panchangObj['date']['astroDate']);
     this.panchangObj["moonLatLong"] = this.getMoonLatLong(this.panchangObj['date']['astroDate']);
-    this.panchangObj['sunRiseAstotimeObj'] = this.getAstroDate(this.panchangObj['sunRiseSet']['rise']['date']);
     this.panchangObj["tithiObj"] = this.getEntityOcuurencesTillDateEnd(this.getTithi, [this.panchangObj["date"], this.panchangObj['sunLatLong']['elon'], this.panchangObj['moonLatLong']['elon'], this.panchangObj["relativeMotionOffsets"].slice(1)], this.panchangObj["date"]["dateWith24Hours"], 'tithi');
     this.panchangObj["nakshatraObj"] = this.getEntityOcuurencesTillDateEnd(this.getNakshatra, [this.panchangObj["date"], this.panchangObj["relativeMotionOffsets"]], this.panchangObj["date"]["dateWith24Hours"], 'naksatra');
     this.panchangObj["yogaObj"] = this.getEntityOcuurencesTillDateEnd(this.getYoga, [this.panchangObj["date"], this.panchangObj["relativeMotionOffsets"].slice(1)], this.panchangObj["date"]["dateWith24Hours"], 'yoga');
     this.panchangObj["karanaObj"] = this.getEntityOcuurencesTillDateEnd(this.getKarana, [this.panchangObj["date"], this.panchangObj['sunLatLong']['elon'], this.panchangObj['moonLatLong']['elon'], this.panchangObj["relativeMotionOffsets"].slice(1)], this.panchangObj["date"]["dateWith24Hours"], 'karna');
-    this.panchangObj["dayDuration"] = this.getDayDuration(this.panchangObj['sunRiseSet']['rise']['date'], this.panchangObj['sunRiseSet']['set']['date']);
-    this.panchangObj["rashiObj"] = { 'moon': this.getRashi(AstroEngine.Body.Moon, this.panchangObj['date']['dateObj'], this.panchangObj['date']['astroDate']), 'sun': this.getRashi(AstroEngine.Body.Sun, this.panchangObj['date']['dateObj'], this.panchangObj['date']['astroDate']) };
-    this.panchangObj["masaObj"] = this.getMasa(this.panchangObj["tithiObj"][0]['tithi'], this.panchangObj["date"]['dateObj'], this.panchangObj['date']['astroDate']);
-    this.panchangObj["vedicTimeObj"] = this.getVedicTime(this.panchangObj['sunRiseSet']['rise']['date'], this.panchangObj["date"]['dateObj'], this.panchangObj["date"]['dateWithZeroHours'], this.panchangObj["observer"]);
+    this.panchangObj["rashiObj"] = { 'moon': this.getEntityOcuurencesTillDateEnd(this.getRashi, [this.panchangObj['date'], AstroEngine.Body.Moon, this.panchangObj["relativeMotionOffsets"]], this.panchangObj["date"]["dateWith24Hours"], 'rashi'), 'sun': this.getEntityOcuurencesTillDateEnd(this.getRashi, [this.panchangObj['date'], AstroEngine.Body.Sun, this.panchangObj["relativeMotionOffsets"]], this.panchangObj["date"]["dateWith24Hours"], 'rashi') };
+    this.panchangObj["masaObj"] = this.getMasa(this.panchangObj["tithiObj"][0]['tithi'], this.panchangObj["date"]);
     this.panchangObj["calSystemObj"] = this.getCalenderSystem(this.panchangObj["date"]['dateObj']);
     return this.panchangObj;
   }
 
+  /* tested */
   getEntityOcuurencesTillDateEnd(entityFunction: Function, args: Array<any>, dateEndTime: number, entity: string): Array<object> {
     let entityList: Array<object> = [];
     let callCompleted: boolean = false;
     while (!callCompleted) {
       let obj: { [key: string]: any } = entityFunction.apply(this, args);
       entityList.push(obj);
-      if (obj["endTimeStamp"] >= dateEndTime) {
+      if (obj["endTimeStamp"] >= dateEndTime || entityList.length > 5) {
         callCompleted = true;
       } else {
-        args[0] = this.getDateObj(new Date(obj["endTimeStamp"] + 10000));
+        args[0] = this.getDateObj(new Date(obj["endTimeStamp"] + 1000000));
         if (entity === 'tithi' || entity === 'karna') {
           args[1] = this.getSunLatLong(args[0]['astroDate'])['elon'];
           args[2] = this.getMoonLatLong(args[0]['astroDate'])['elon'];
@@ -68,25 +68,35 @@ export class PanchangService {
     return calenderSystem;
   }
 
-
-  getDayDuration(sunRiseTime: Date, sunSetTime: Date): number {
-    let diff: number = sunSetTime.getTime() - sunRiseTime.getTime();
-    return Number((((diff / 1000) / 60) / 60).toFixed(2));
+  /* tested */
+  getDayDuration(sunRiseTime: Date, sunSetTime: Date): {[key: string]: any} {
+    let dayDuration: number = sunSetTime.getTime() - sunRiseTime.getTime();
+    let twentyFourHoursInMillSec = 86400000;
+    let nightDuration = twentyFourHoursInMillSec - dayDuration;
+    let durationObj:{[key: string]: any} = {
+      'dayDurationInMillSec': dayDuration,
+      'nightDurationInMilliSec': nightDuration,
+      'dayDuration': this.convertHoursToMilliseconds(Number((((dayDuration / 1000) / 60) / 60)))['HrMinSec'],
+      'nightDuration': this.convertHoursToMilliseconds(Number((((nightDuration / 1000) / 60) / 60)))['HrMinSec'],
+    }
+    durationObj['dayDurationString'] = durationObj['dayDuration'][0] + ' Hrs, ' + durationObj['dayDuration'][1] + ' Min, ' + durationObj['dayDuration'][2] + ' Sec'
+    durationObj['nightDurationString'] = durationObj['nightDuration'][0] + ' Hrs, ' + durationObj['nightDuration'][1] + ' Min, ' + durationObj['nightDuration'][2] + ' Sec'
+    return durationObj;
   }
 
 
-  getMasa(tithi: number, date: Date, astroDate: AstroEngine.AstroTime): { [key: string]: any } {
+  getMasa(tithi: number, dateObj: { [key: string]: any },): { [key: string]: any } {
     let masaObj: { [key: string]: any } = {};
-    let lastNewMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(0, date, -(tithi + 2));
-    let nextNewMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(0, date, (30 - tithi) + 2);
+    let lastNewMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(0, dateObj["dateObj"], -(tithi + 2));
+    let nextNewMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(0, dateObj["dateObj"], (30 - tithi) + 2);
     if (lastNewMoon && nextNewMoon) {
-      let currentLunarMonth: number = this.getRashi(AstroEngine.Body.Moon, lastNewMoon['date'], lastNewMoon);
-      let nextLunarMonth: number = this.getRashi(AstroEngine.Body.Moon, lastNewMoon['date'], nextNewMoon);
+      let currentLunarMonth: number = Number(this.getRashi(dateObj, AstroEngine.Body.Moon));
+      let nextLunarMonth: number = Number(this.getRashi(dateObj, AstroEngine.Body.Moon));
       masaObj['isLeapMonth'] = currentLunarMonth === nextLunarMonth;
       masaObj['masa'] = currentLunarMonth + 1;
       masaObj['masa'] = masaObj['masa'] > 12 ? (masaObj['masa'] % 12) : masaObj['masa'];
       masaObj['ritu'] = Math.ceil(masaObj['masa'] / 2);
-      masaObj['ayana'] = this.getAyana(date);
+      masaObj['ayana'] = this.getAyana(dateObj["dateObj"]);
     }
     return masaObj;
   }
@@ -105,31 +115,42 @@ export class PanchangService {
   }
 
 
-  getRashi(planet: AstroEngine.Body, date: Date, astroDate: AstroEngine.AstroTime): number {
-    let degree: number = this.getPlanetLatLong(planet, astroDate)['elon'];
-    let nirayana = (degree - this.getAayamsha(date));
+  getRashi(dateObj: { [key: string]: any }, planet: AstroEngine.Body, offsets: Array<number> = []): { [key: string]: any } | number {
+    let degree: number = this.getPlanetLatLong(planet, dateObj["astroDate"])['elon'];
+    let nirayana = (degree - this.getAayamsha(dateObj["dateObj"]));
     nirayana = nirayana < 0 ? (nirayana + 360) : nirayana;
     const rashi = Math.ceil(nirayana / 30);
-    return rashi;
+
+    if (offsets.length) {
+        const relativeMotion: Array<number> = offsets.map((t: number) => {
+         let releativeNiryana = this.getPlanetLatLong(planet, dateObj["astroDate"].AddDays(t))['elon'] - this.getAayamsha(dateObj["astroDate"].AddDays(t)['date'])
+         releativeNiryana = releativeNiryana < 0 ? (releativeNiryana + 360) : releativeNiryana;
+         return releativeNiryana;
+         });
+        const approxEnd = this.inverseLagrange(offsets, relativeMotion, rashi * 360 / 12) * 24;
+        const rashiEndTime = new Date(dateObj['timeStamp'] + this.convertHoursToMilliseconds(approxEnd)['millisec'])
+        return { rashi, rashiEndTime, endTimeStamp: rashiEndTime.getTime() };
+    } else {
+        return rashi;
+    }
   }
 
+  /* tested */
   getVedicTime(sunRiseTime: Date, date: Date, dateWithZeroHour: Date, observer: AstroEngine.Observer): { [key: string]: any } {
     let vedicTime: { [key: string]: any } = {};
-    let dt: number = date.getTime() - sunRiseTime.getTime();
-    if (dt < 0) {
+    let timeDuration: number = date.getTime() - sunRiseTime.getTime();
+    if (timeDuration < 0) {
       let predt = new Date(dateWithZeroHour.getTime());
       predt.setDate(predt.getDate() - 1);
       vedicTime['previousSunRise'] = this.getSunRiseSet(observer, predt);
-      dt = date.getTime() - vedicTime['previousSunRise']['rise']['date'].getTime();
+      timeDuration = date.getTime() - vedicTime['previousSunRise']['rise']['date'].getTime();
     }
-    /* Note: 1 ghati = 24 min, 1 pal = 24 sec, 2.5 vipal = 1 sec */
-    const min = dt / 60000;
-    const ghati = min / 24;
-    const remainingMinute = min - 24 * Math.floor(ghati);
-    const pal = (remainingMinute * 60) / 24;
-    const remainingPal = (pal) - Math.floor(pal);
-    const vipal = (remainingPal * 24) * 2.5;
-    vedicTime['vedicTime'] = Math.floor(ghati) + ':' + Math.floor(pal) + ':' + Math.floor(vipal);
+
+    // Note: 1 gegorian day = 60 ghati, 1 ghati = 24 min, 1 ghati = 60 kala, 1 kala = 60 vikala
+    const ghati = timeDuration / 1440000;
+    const kala = (ghati - Math.floor(ghati))*60;
+    const vikala = (kala - Math.floor(kala))*60;
+    vedicTime['vedicTime'] = Math.floor(ghati) + ' Ghati, ' + Math.floor(kala) + ' Kala, ' + Math.floor(vikala)+ ' Vikala';
     return vedicTime;
   }
 
@@ -151,9 +172,9 @@ export class PanchangService {
 
     let approxEnd: number = this.inverseLagrange(offsets, relativeMotion, tithiObj['degreesLeft']) * 24; /* <-- radian to hour */
     tithiObj['tithiEnd'] = new Date(dateObj['timeStamp'] + this.convertHoursToMilliseconds(approxEnd)['millisec']);
-
+    tithiObj['tithiEndAstroDate'] = this.getAstroDate(tithiObj['tithiEnd']);
     /* check for skipped tithi -- not validated */
-    let nextPhase: number = this.getMoonLatLong(dateObj['astroDate'].AddDays(1))['elon'] - this.getSunLatLong(dateObj['astroDate'].AddDays(1))['elon'];
+    let nextPhase: number = this.getMoonLatLong(tithiObj['tithiEndAstroDate'].AddDays(0.5))['elon'] - this.getSunLatLong(tithiObj['tithiEndAstroDate'].AddDays(0.5))['elon'];
     tithiObj['substituionValueSkipCheck'] = nextPhase;
     nextPhase = nextPhase < 0 ? (360 + nextPhase) : nextPhase;
     let nextTithi = (Math.ceil(nextPhase / 12) - tithiObj['tithi']);
@@ -163,9 +184,11 @@ export class PanchangService {
       tithiObj['tithiSkipped'] = true;
       tithiObj['phase'] = nextPhase;
       tithiObj['tithi'] = tithiObj['tithi'] + 1 % 30;
+      tithiObj['tithi'] = Math.ceil(tithiObj['phase'] / 12);
       tithiObj['degreesLeft'] = (tithiObj['tithi'] * 12) - tithiObj['phase'];
       approxEnd = this.inverseLagrange(offsets, relativeMotion, tithiObj['degreesLeft']) * 24;
       tithiObj['tithiEnd'] = new Date(dateObj['timeStamp'] + this.convertHoursToMilliseconds(approxEnd)['millisec']);
+      tithiObj['tithiEndAstroDate'] = this.getAstroDate(tithiObj['tithiEnd']);
     }
 
     tithiObj['paksha'] = tithiObj['tithi'] > 15 ? 2 : 1;
@@ -183,7 +206,7 @@ export class PanchangService {
     });
 
     nakshatraObj['nakshatra'] = Math.ceil(relativeLongitudes[0] * 27 / 360);
-    nakshatraObj['nakshatraCharana'] = Math.ceil(((relativeLongitudes[0] - Math.floor(relativeLongitudes[0])) * 800) / 200);
+    nakshatraObj['nakshatraCharana'] = this.getNakshartraCharana(relativeLongitudes[0]);
     relativeLongitudes = this.unwrapAngles(relativeLongitudes);
     let approxEnd: number = this.inverseLagrange(offsets, relativeLongitudes, nakshatraObj['nakshatra'] * 360 / 27) * 24;
     nakshatraObj['nakshatraEndTime'] = new Date(dateObj['timeStamp'] + this.convertHoursToMilliseconds(approxEnd)['millisec']);
@@ -201,6 +224,17 @@ export class PanchangService {
     nakshatraObj['endTimeStamp'] = nakshatraObj['nakshatraEndTime'].getTime();
     return nakshatraObj;
   }
+
+  /* tested */
+  getNakshartraCharana(longitude:number):number {
+      let oneNakshatraDegreeSpan: number = (360 / 27);
+      let oneCharanaDegreeSpan: number = (360 / 108);
+      let nakshatra: number = Math.trunc(longitude / oneNakshatraDegreeSpan)+1;
+      let degreeLeft: number = ((nakshatra * oneNakshatraDegreeSpan) - longitude);
+      let charana: number = Math.abs(Math.trunc((oneNakshatraDegreeSpan - degreeLeft) / oneCharanaDegreeSpan))+1;
+      return charana;
+    }
+
 
   getKarana(dateObj: { [key: string]: any }, currentSunLong: number, currentMoonLong: number, offsets: Array<number>): { [key: string]: any } {
     let karanaObj: { [key: string]: any } = {};
@@ -271,31 +305,29 @@ export class PanchangService {
     return degreeAngles;
   }
 
-
-  vernalPointLongitudeChange(time1: AstroEngine.AstroTime, time2: AstroEngine.AstroTime) {
-    const vec2 = new AstroEngine.Vector(1, 0, 0, time2);
-    const rot = AstroEngine.CombineRotation(
-      AstroEngine.Rotation_ECT_EQJ(time2),
-      AstroEngine.Rotation_EQJ_ECT(time1)
-    );
-    const vec1 = AstroEngine.RotateVector(rot, vec2);
-    const sphere = AstroEngine.SphereFromVector(vec1);
+  /* tested */
+  vernalPointLongitudeChange(time1: AstroEngine.AstroTime, time2: AstroEngine.AstroTime): number {
+    const vec2:AstroEngine.Vector = new AstroEngine.Vector(1, 0, 0, time2);
+    const rot:AstroEngine.RotationMatrix = AstroEngine.CombineRotation(AstroEngine.Rotation_ECT_EQJ(time2), AstroEngine.Rotation_EQJ_ECT(time1));
+    const vec1:AstroEngine.Vector = AstroEngine.RotateVector(rot, vec2);
+    const sphere: AstroEngine.Spherical = AstroEngine.SphereFromVector(vec1);
     return (sphere.lon > 180) ? (360 - sphere.lon) : sphere.lon;
   }
 
   getAayamsha(date: Date, correctionIndex: number = 0): number {
-    const correctionSystem = [{ '0': 'lahiri', 'startYear': 285, 'movement': 50.2791, 'zeroAyanamsaVernalEquinoxDate': new Date("Sun Mar 22 0285 15:57:0 GMT") }];
+    const correctionSystem:[{[key:string]:any}] = [{ '0': 'lahiri', 'startYear': 285, 'movement': 50.2791, 'zeroAyanamsaVernalEquinoxDate': new Date("Sun Mar 22 0285 15:57:0 GMT") }];
     correctionIndex = correctionIndex > correctionSystem.length ? 0 : correctionIndex;
     return this.vernalPointLongitudeChange(this.getAstroDate(correctionSystem[correctionIndex]['zeroAyanamsaVernalEquinoxDate']), this.getAstroDate(date));
   }
 
+  /* tested */
   convertHoursToMilliseconds(hours: number): { millisec: number, HrMinSec: Array<number> } {
     hours = Number(hours.toFixed(3));
     let h: number = Math.floor(hours);
     let mins: number = (hours - h) * 60;
     let m: number = Math.floor(mins);
     let s: number = (mins - m) * 60;
-    return { millisec: (h * 60 * 60 * 1000) + (m * 60 * 1000) + (s * 1000), HrMinSec: [h, m, s] };
+    return { millisec: (h * 60 * 60 * 1000) + (m * 60 * 1000) + (s * 1000), HrMinSec: [h, m, Math.floor(s)] };
   }
 
   inverseLagrange(x: Array<number>, y: Array<number>, ya: number): number {
@@ -317,9 +349,9 @@ export class PanchangService {
     return total;
   }
 
-
+  /* tested */
   getVaara(date: Date, sunRiseDate: Date): { [key: string]: any } {
-    let day = date.getDay() + 1;
+    let day:number = date.getDay() + 1;
     if (date.getTime() < sunRiseDate.getTime()) {
       day = day - 1;
       day = day === 0 ? 7 : day;
@@ -327,26 +359,31 @@ export class PanchangService {
     return { day };
   }
 
+  /* tested */
   getSunLatLong(date: AstroEngine.AstroTime): { [key: string]: any } {
     return AstroEngine.Ecliptic(AstroEngine.GeoVector(AstroEngine.Body.Sun, date, false));
   }
 
+  /* tested */
   getMoonLatLong(date: AstroEngine.AstroTime): { [key: string]: any } {
     return AstroEngine.Ecliptic(AstroEngine.GeoVector(AstroEngine.Body.Moon, date, false));
   }
 
+  /* tested */
   getPlanetLatLong(planet: AstroEngine.Body, date: AstroEngine.AstroTime): { [key: string]: any } {
     return AstroEngine.Ecliptic(AstroEngine.GeoVector(planet, date, false));
   }
 
+  /* tested */
   getSunRiseSet(observer: AstroEngine.Observer, dateWithZeroHour: Date): object {
-    const astroDate = this.getAstroDate(dateWithZeroHour);
+    const astroDate: AstroEngine.AstroTime = this.getAstroDate(dateWithZeroHour);
     const sunRiseSetObject: any = { rise: AstroEngine.SearchRiseSet(AstroEngine.Body.Sun, observer, +1, astroDate, 1), set: AstroEngine.SearchRiseSet(AstroEngine.Body.Sun, observer, -1, astroDate, 1) };
-    sunRiseSetObject['riseString'] = sunRiseSetObject['rise']['date'].toLocaleTimeString([], { hour12: true });
-    sunRiseSetObject['setString'] = sunRiseSetObject['set']['date'].toLocaleTimeString([], { hour12: true });
+    sunRiseSetObject['riseString'] = sunRiseSetObject['rise'] ? sunRiseSetObject['rise']['date'].toLocaleTimeString([], { hour12: true }): 'No sun rise';
+    sunRiseSetObject['setString'] = sunRiseSetObject['set'] ? sunRiseSetObject['set']['date'].toLocaleTimeString([], { hour12: true }): 'No sun rise';
     return sunRiseSetObject;
   }
 
+  /* tested */
   getMoonRiseSet(observer: AstroEngine.Observer, sunRiseDate: Date): object {
     const moonRiseSetObject: any = { rise: AstroEngine.SearchRiseSet(AstroEngine.Body.Moon, observer, +1, sunRiseDate, 1), set: AstroEngine.SearchRiseSet(AstroEngine.Body.Moon, observer, -1, sunRiseDate, 1) };
     moonRiseSetObject['riseString'] = moonRiseSetObject['rise'] ? (moonRiseSetObject['rise']['date'].toLocaleTimeString([], moonRiseSetObject['rise']['date'].getDate() !== sunRiseDate.getDate() ? { hour12: true, day: 'numeric', month: 'short' } : { hour12: true }).replace(',', '')) : 'No moon rise';
@@ -354,14 +391,17 @@ export class PanchangService {
     return moonRiseSetObject;
   }
 
+  /* tested */
   getAstroDate(date: Date): AstroEngine.AstroTime {
     return AstroEngine.MakeTime(date);
   }
 
+  /* tested */
   getAstroObserver(lat: number, long: number, elevation: number): AstroEngine.Observer {
     return new AstroEngine.Observer(lat, long, elevation);
   }
 
+  /* tested */
   getDateObj(date: Date, fullDate: boolean = false): object {
     return fullDate ? {
       dateObj: date,

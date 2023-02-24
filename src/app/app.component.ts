@@ -21,7 +21,7 @@ export class AppComponent implements OnInit {
   };
   charana: any = { 1: 'Parthama Charana', 2: 'Dwitiya Charana', 3: 'Tritiya Charana', 4: 'Chaturtha Charana' }
   days: any = { 1: 'Sunday', 2: 'Monday', 3: 'Tuesday', 4: 'Wednesday', 5: 'Thrusday', 6: 'Friday', 7: 'Saturday' };
-  vedicDays: any = { 1: 'Ravivara', 2: 'Somvara', 3: 'Mangalvara', 4: 'Budhavara', 5: 'Guruvarar', 6: 'Sukravaar', 7: 'Shanivaar' };
+  vedicDays: any = { 1: 'Ravivara', 2: 'Somvara', 3: 'Mangalvara', 4: 'Budhavara', 5: 'Guruvara', 6: 'Sukravara', 7: 'Shanivara' };
   tithi: any = {
     1: 'Pratipada', 2: 'Dwithiya', 3: 'Trithiya', 4: 'Chaturthi', 5: 'Panchami', 6: 'Shasthi', 7: 'Saptami',
     8: 'Ashtami', 9: 'Navami', 10: 'Dashami', 11: 'Ekadasi', 12: 'Dwadashi', 13: 'Thrayodashi', 14: 'Chaturdashi',
@@ -67,6 +67,7 @@ export class AppComponent implements OnInit {
   }
 
   getView() {
+    // issue in inversion of date : 1677174883080 / tithi : 1677180745998
     let obj: any = this._panchangService.getPanchang(new Date());
     console.log(obj);
     this.panchangObject = obj;
@@ -76,8 +77,8 @@ export class AppComponent implements OnInit {
     this.panchangObject['nakshatraObj'].forEach((element: any) => { element['nakshatraMap'] = this.nakshatra[element['nakshatra']]; element['nakshatraCharanaMap'] = this.charana[element['nakshatraCharana']]; });
     this.panchangObject['yogaObj'].forEach((element: any) => { element['yogaMap'] = this.yoga[element['yog']]; });
     this.panchangObject['karanaObj'].forEach((element: any) => { element['karanaMap'] = this.karana[element['karana']]; });
-    this.panchangObject['rashiObj']['moonRashiMap'] = this.rashi[obj['rashiObj']['moon']];
-    this.panchangObject['rashiObj']['sunRashiMap'] = this.rashi[obj['rashiObj']['sun']];
+    this.panchangObject['rashiObj']['moon'].forEach((element: any) => { element['moonRashiMap'] = this.rashi[element['rashi']]; }); 
+    this.panchangObject['rashiObj']['sun'].forEach((element: any) => { element['sunRashiMap'] = this.rashi[element['rashi']]; }); 
     this.panchangObject['masaObj']['masaMap'] = this.masa[obj['masaObj']['masa']];
     this.panchangObject['masaObj']['rituMap'] = this.ritu[obj['masaObj']['ritu']];
     this.panchangObject['masaObj']['ayanaMap'] = this.ayana[obj['masaObj']['ayana']];
