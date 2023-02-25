@@ -58,7 +58,7 @@ export class AppComponent implements OnInit {
   ritu: any = { 1: 'Vasant Ritu', 2: 'Grishma Ritu', 3: 'Varsha Ritu', 4: 'Sharad Ritu', 5: 'Hemant Ritu', 6: 'Shishir Ritu' };
   masa: any = { 1: 'Chaitra', 2: 'Vaisakha', 3: 'Jyaistha', 4: 'Asadha', 5: 'Shravana', 6: 'Bhadra', 7: 'Ashwin', 8: 'Kartika', 9: 'Mārgasirsa (Agrahayana)', 10: 'Pausha', 11: 'Magha', 12: 'Phalguna' };
   rashi: any = { 1: 'Mesh', 2: 'Vrishabh', 3: 'Mithun', 4: 'Kark', 5: 'Singh', 6: 'Kanya', 7: 'Tula', 8: 'Vrishchik', 9: 'Dhanu', 10: 'Makar', 11: 'Kumbh', 12: 'Meen' };
-
+  pahara: any = {1: 'Purvanha', 2: 'Madhyanha', 3: 'Aparanha', 4: 'Sayanha', 5: 'Pradosha', 6: 'Nishitha', 7: 'Triyama', 8: 'Usha'}
   constructor(private _panchangService: PanchangService) {
   }
 
@@ -82,5 +82,6 @@ export class AppComponent implements OnInit {
     this.panchangObject['masaObj']['masaMap'] = this.masa[obj['masaObj']['masa']];
     this.panchangObject['masaObj']['rituMap'] = this.ritu[obj['masaObj']['ritu']];
     this.panchangObject['masaObj']['ayanaMap'] = this.ayana[obj['masaObj']['ayana']];
+    this.panchangObject['dayDuration']['paharaMap'] = this.pahara[obj['dayDuration']['pahara']]
   }
 }
