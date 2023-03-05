@@ -2,7 +2,7 @@
 <table class="table table-bordered px-5">
   <thead>
     <tr>
-      <th colspan="2" class="text-center" style="color: rgb(172, 66, 83);">{{panchangObject['date']['dateObj']}} <span style="margin-left: 3%;"><button (click)="getView()">Refresh</button></span></th>
+      <th colspan="2" class="text-center" style="color: rgb(172, 66, 83);">{{panchangObject['date']['dateObj']}} <span style="margin-left: 3%;"><button (click)="getView()">Refresh</button></span><span style="margin-left: 3%;"><input type="datetime-local" (change)="getView($event)" /></span></th>
     </tr>
   </thead>
   <tbody>
@@ -99,12 +99,20 @@
       </td>
     </tr>
     <tr>
-      <td style="text-align: right; width: 50%;">Month</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['masaMap']}}</span></td>
+      <td style="text-align: right; width: 50%;">Amanta Month</td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['amantaMasaMap']}}</span></td>
     </tr>
     <tr>
-      <td style="text-align: right; width: 50%;">Ritu</td>
-      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['rituMap']}}</span></td>
+      <td style="text-align: right; width: 50%;">Purnimanta Month</td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['purnimantaMasaMap']}}</span></td>
+    </tr>
+    <tr>
+      <td style="text-align: right; width: 50%;"> Ritu</td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['amantaRituMap']}}</span></td>
+    </tr>
+    <tr>
+      <td style="text-align: right; width: 50%;">Sidereal Ritu</td>
+      <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['siderealRituMap']}}</span></td>
     </tr>
     <tr>
       <td style="text-align: right; width: 50%;">Vedic Ayana</td>

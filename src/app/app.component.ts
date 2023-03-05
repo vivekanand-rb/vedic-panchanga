@@ -66,9 +66,9 @@ export class AppComponent implements OnInit {
     this.getView()
   }
 
-  getView() {
+  getView(event?: any) {
     // issue in inversion of date : 1677174883080 / tithi : 1677180745998
-    let obj: any = this._panchangService.getPanchang(new Date());
+    let obj: any = this._panchangService.getPanchang(event && event.target ? event.target.valueAsDate :new Date());
     console.log(obj);
     this.panchangObject = obj;
     this.panchangObject['date']['dayMap'] = this.days[(obj['date']['day'] + 1)];
@@ -79,9 +79,11 @@ export class AppComponent implements OnInit {
     this.panchangObject['karanaObj'].forEach((element: any) => { element['karanaMap'] = this.karana[element['karana']]; });
     this.panchangObject['rashiObj']['moon'].forEach((element: any) => { element['moonRashiMap'] = this.rashi[element['rashi']]; }); 
     this.panchangObject['rashiObj']['sun'].forEach((element: any) => { element['sunRashiMap'] = this.rashi[element['rashi']]; }); 
-    this.panchangObject['masaObj']['masaMap'] = this.masa[obj['masaObj']['masa']];
-    this.panchangObject['masaObj']['rituMap'] = this.ritu[obj['masaObj']['ritu']];
+    this.panchangObject['masaObj']['amantaMasaMap'] = this.masa[obj['masaObj']['amantaMasa']];
+    this.panchangObject['masaObj']['amantaRituMap'] = this.ritu[obj['masaObj']['amantaRitu']];
+    this.panchangObject['masaObj']['siderealRituMap'] = this.ritu[obj['masaObj']['siderealRitu']];
     this.panchangObject['masaObj']['ayanaMap'] = this.ayana[obj['masaObj']['ayana']];
+    this.panchangObject['masaObj']['purnimantaMasaMap'] = this.masa[obj['masaObj']['purnimantaMasa']];
     this.panchangObject['dayDuration']['paharaMap'] = this.pahara[obj['dayDuration']['pahara']]
   }
 }

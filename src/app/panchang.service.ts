@@ -116,16 +116,52 @@ export class PanchangService {
     let nextNewMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(0, dateObj["dateObj"], (30 - tithi) + 2);
     let lastFullMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(180, dateObj["dateObj"], -(tithi + 16));
     let nextFullMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(180, dateObj["dateObj"], (30 - tithi) + 16);
+
     if (lastNewMoon && nextNewMoon) {
       let currentLunarMonth: number = Number(this.getRashi(this.getDateObj(lastNewMoon['date']), AstroEngine.Body.Moon));
       let nextLunarMonth: number = Number(this.getRashi(this.getDateObj(nextNewMoon['date']), AstroEngine.Body.Moon));
-      masaObj['isLeapMonth'] = currentLunarMonth === nextLunarMonth;
-      masaObj['masa'] = currentLunarMonth + 1;
-      masaObj['masa'] = masaObj['masa'] > 12 ? (masaObj['masa'] % 12) : masaObj['masa'];
-      masaObj['ritu'] = Math.ceil(masaObj['masa'] / 2);
-      masaObj['ayana'] = this.getAyana(dateObj["dateObj"]);
+      masaObj['isAmantaLeapMonth'] = currentLunarMonth === nextLunarMonth;
+      masaObj['amantaMasa'] = currentLunarMonth + 1;
+      masaObj['amantaMasa'] = masaObj['amantaMasa'] > 12 ? (masaObj['amantaMasa'] % 12) : masaObj['amantaMasa'];
+      masaObj['amantaRitu'] = Math.ceil(masaObj['amantaMasa'] / 2);
     }
+
+    if(lastFullMoon && nextFullMoon){
+      let currentLunarMonth: number = Number(this.getRashi(this.getDateObj(lastFullMoon['date']), AstroEngine.Body.Moon));
+      let nextLunarMonth: number = Number(this.getRashi(this.getDateObj(nextFullMoon['date']), AstroEngine.Body.Moon));
+      masaObj['isPurnimantaLeapMonth'] = currentLunarMonth === nextLunarMonth;
+      masaObj['purnimantaMasa'] = currentLunarMonth + 8;
+      masaObj['purnimantaMasa'] = masaObj['purnimantaMasa'] > 12 ? (masaObj['purnimantaMasa'] % 12) : masaObj['purnimantaMasa'];
+      masaObj['purnimantaRitu'] = Math.ceil(masaObj['purnimantaMasa'] / 2);
+    }
+    
+    masaObj['siderealRituObj'] = this.getRituOfYear(dateObj["dateObj"].getFullYear(), dateObj["dateObj"]);
+    masaObj['siderealRitu'] = masaObj['siderealRituObj']['ritu'];
+    masaObj['ayana'] = this.getAyana(dateObj["dateObj"]);
     return masaObj;
+  }
+
+  /* tested */
+  getRituOfYear(year: number, date?: Date): { [key: string]: any } {
+    let rituTargetLon: { [key: string]: number } = { '2': 330, '4': 30, '6': 90, '8': 150, '10': 210, '12': 270 }
+    let getRituTime = (targetLon: number, month: number, day: number) => {
+      let startDate:Date = new Date(Date.UTC(year, month - 1, day));
+      let time: AstroEngine.AstroTime | null = AstroEngine.SearchSunLongitude(targetLon, startDate, 27);
+      return time;
+    }
+
+    let rituStartTimeList: Array<AstroEngine.AstroTime | null> = [getRituTime(rituTargetLon[2], 2, 1), getRituTime(rituTargetLon[4], 4, 1), getRituTime(rituTargetLon[6], 6, 1), getRituTime(rituTargetLon[8], 8, 1), getRituTime(rituTargetLon[10], 10, 1), getRituTime(rituTargetLon[12], 12, 1)];
+    if (date) {
+      let ritu:number = 6;
+      rituStartTimeList.forEach((astroTime: AstroEngine.AstroTime | null, index: number) => {
+        if (astroTime && date.getTime() >= astroTime['date'].getTime()) {
+          ritu = index + 1;
+        }
+      });
+      return { ritu, yearsRituTimeList: rituStartTimeList };
+    } else {
+      return { ritu: null, yearsRituTimeList: rituStartTimeList };
+    }
   }
 
   getAyana(date: Date): number {
@@ -460,16 +496,8 @@ export class PanchangService {
 
   async getAndAssignLocationObj(assignableObjRef: { [key: string]: any }) {
     if (!sessionStorage.getItem('locationObject')) {
+      //TODO:  To be replaced by library to get location info.
       const loacationResponse: any = await firstValueFrom(this._http.get("http://ip-api.com/json"));
-      // .pipe(switchMap(async (response: any) => {
-      // debugger
-      // const eleVationResponse: any = await firstValueFrom(this._http.get("https://api.open-elevation.com/api/v1/lookup?locations=" + response['lat'] + "," + response['lon']));
-      // response['elevation'] = eleVationResponse['results'][0]['elevation'] / 1000;
-      // return response;
-      // })));
-
-      // const eleVationResponse: any = await firstValueFrom(this._http.get("https://api.open-elevation.com/api/v1/lookup?locations=" + loacationResponse['lat'] + "," + loacationResponse['lon']));
-      // loacationResponse['elevation'] =  eleVationResponse['results'] ? ( eleVationResponse['results'][0]['elevation'] / 1000) : 0.002;
       loacationResponse['elevation'] = 0.02
       sessionStorage.setItem('locationObject', JSON.stringify(loacationResponse));
       assignableObjRef["locationObj"] = loacationResponse;
