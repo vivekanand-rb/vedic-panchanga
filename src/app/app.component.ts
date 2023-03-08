@@ -59,6 +59,8 @@ export class AppComponent implements OnInit {
   masa: any = { 1: 'Chaitra', 2: 'Vaisakha', 3: 'Jyaistha', 4: 'Asadha', 5: 'Shravana', 6: 'Bhadra', 7: 'Ashwin', 8: 'Kartika', 9: 'Mārgasirsa (Agrahayana)', 10: 'Pausha', 11: 'Magha', 12: 'Phalguna' };
   rashi: any = { 1: 'Mesh', 2: 'Vrishabh', 3: 'Mithun', 4: 'Kark', 5: 'Singh', 6: 'Kanya', 7: 'Tula', 8: 'Vrishchik', 9: 'Dhanu', 10: 'Makar', 11: 'Kumbh', 12: 'Meen' };
   pahara: any = {1: 'Purvanha', 2: 'Madhyanha', 3: 'Aparanha', 4: 'Sayanha', 5: 'Pradosha', 6: 'Nishitha', 7: 'Triyama', 8: 'Usha'}
+  samvatsara: any = { 1: 'Prabhava', 2: 'Vibhava', 3: 'Shukla', 4: 'Pramoda', 5: 'Prajapati', 6: 'Angira', 7: 'Shrimukha', 8: 'Bhava', 9: 'Yuva', 10: 'Dhata', 11: 'Ishwara', 12: 'Bahudhanya', 13: 'Pramathi', 14: 'Vikrama', 15: 'Vrisha', 16: 'Chitrabhanu', 17: 'Subhanu', 18: 'Tarana', 19: 'Parthiva', 20: 'Vyaya', 21: 'Sarvajit', 22: 'Sarvadhari', 23: 'Virodhi', 24: 'Vikriti', 25: 'Khara', 26: 'Nandana', 27: 'Vijaya', 28: 'Jaya', 29: 'Manmatha', 30: 'Durmukha', 31: 'Hemalambi', 32: 'Vilambi', 33: 'Vikari', 34: 'Sharvari', 35: 'Plava', 36: 'Shubhakrit', 37: 'Shobhakrit', 38: 'Krodhi', 39: 'Vishvavasu', 40: 'Parabhava', 41: 'Plavanga', 42: 'Kilaka', 43: 'Saumya', 44: 'Sadharana', 45: 'Virodhakrit', 46: 'Paridhavi', 47: 'Pramadi', 48: 'Aananda', 49: 'Rakshasa', 50: 'Nala', 51: 'Pingala', 52: 'Kalayukta', 53: 'Siddharthi', 54: 'Raudra', 55: 'Durmati', 56: 'Dundubhi', 57: 'Rudhirodgari', 58: 'Raktaksha', 59: 'Krodhana', 60: 'Kshaya' };
+ 
   constructor(private _panchangService: PanchangService) {
   }
 
@@ -68,7 +70,7 @@ export class AppComponent implements OnInit {
 
   getView(event?: any) {
     // issue in inversion of date : 1677174883080 / tithi : 1677180745998
-    let obj: any = this._panchangService.getPanchang(event && event.target ? event.target.valueAsDate :new Date());
+    let obj: any = this._panchangService.getPanchang(event && event.target ? new Date(event.target.value) :new Date());
     console.log(obj);
     this.panchangObject = obj;
     this.panchangObject['date']['dayMap'] = this.days[(obj['date']['day'] + 1)];
@@ -84,6 +86,8 @@ export class AppComponent implements OnInit {
     this.panchangObject['masaObj']['siderealRituMap'] = this.ritu[obj['masaObj']['siderealRitu']];
     this.panchangObject['masaObj']['ayanaMap'] = this.ayana[obj['masaObj']['ayana']];
     this.panchangObject['masaObj']['purnimantaMasaMap'] = this.masa[obj['masaObj']['purnimantaMasa']];
-    this.panchangObject['dayDuration']['paharaMap'] = this.pahara[obj['dayDuration']['pahara']]
+    this.panchangObject['dayDuration']['paharaMap'] = this.pahara[obj['dayDuration']['pahara']];
+    this.panchangObject['calSystemObj']['vikramSamvatSaraMap'] = this.samvatsara[obj['calSystemObj']['vikramSamvatSara']];
+    this.panchangObject['calSystemObj']['sakaSamvatSaraMap'] = this.samvatsara[obj['calSystemObj']['sakaSamvatSara']];
   }
 }

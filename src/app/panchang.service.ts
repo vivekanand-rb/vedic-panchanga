@@ -53,18 +53,33 @@ export class PanchangService {
     return entityList;
   }
 
+  /* tested */
   getCalenderSystem(date: Date): { [key: string]: any } {
-    const year: number = date.getFullYear();
-    const isLeapYear: boolean = ((year % 4 === 0) && (year % 100 != 0)) || (year % 400 === 0);
-    let startDate: Date = isLeapYear ? new Date(year, 2, 21) : new Date(year, 2, 22);
+    let year = date.getFullYear();
+    let indianCalanderStartMonth =  new Date(date.getFullYear(), 2, 1);
+    let fullMoonYearEndTime: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(180, indianCalanderStartMonth, 30);
+    let newMoonYearEndTime: AstroEngine.AstroTime | null = fullMoonYearEndTime ? AstroEngine.SearchMoonPhase(0, fullMoonYearEndTime['date'], 16): null;
     let calenderSystem: { [key: string]: any } = { 'vikramSamvat': 0, 'sakaSamvat': 0 };
-    if (date >= startDate) {
-      calenderSystem['vikramSamvat'] = year + 57;
-      calenderSystem['sakaSamvat'] = year - 78;
-    } else {
-      calenderSystem['vikramSamvat'] = year + 56;
-      calenderSystem['sakaSamvat'] = year - 79;
+
+    if (newMoonYearEndTime) {
+      if (date.getTime() > newMoonYearEndTime['date'].getTime()) {
+        calenderSystem['sakaSamvat'] = year - 78;
+      } else {
+        calenderSystem['sakaSamvat'] = year - 79;
+      }
     }
+
+    if (fullMoonYearEndTime) {
+      if (date.getTime() > fullMoonYearEndTime['date'].getTime()) {
+        calenderSystem['vikramSamvat'] = year + 57;
+      } else {
+        calenderSystem['vikramSamvat'] = year + 56;
+      }
+    }
+
+    calenderSystem['vikramSamvatSara'] =  ((calenderSystem['vikramSamvat'] + 9 ) % 60) + 1; 
+    calenderSystem['sakaSamvatSara'] =  ((calenderSystem['sakaSamvat'] + 11) % 60) + 1;
+
     return calenderSystem;
   }
 
@@ -112,10 +127,10 @@ export class PanchangService {
 
   getMasa(tithi: number, dateObj: { [key: string]: any }): { [key: string]: any } {
     let masaObj: { [key: string]: any } = {};
+    let lastFullMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(180, dateObj["dateObj"], -(tithi + 16));
+    // let nextFullMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(180, dateObj["dateObj"], (30 - tithi) + 16);
     let lastNewMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(0, dateObj["dateObj"], -(tithi + 2));
     let nextNewMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(0, dateObj["dateObj"], (30 - tithi) + 2);
-    let lastFullMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(180, dateObj["dateObj"], -(tithi + 16));
-    let nextFullMoon: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(180, dateObj["dateObj"], (30 - tithi) + 16);
 
     if (lastNewMoon && nextNewMoon) {
       let currentLunarMonth: number = Number(this.getRashi(this.getDateObj(lastNewMoon['date']), AstroEngine.Body.Moon));
@@ -126,12 +141,13 @@ export class PanchangService {
       masaObj['amantaRitu'] = Math.ceil(masaObj['amantaMasa'] / 2);
     }
 
-    if(lastFullMoon && nextFullMoon){
-      let currentLunarMonth: number = Number(this.getRashi(this.getDateObj(lastFullMoon['date']), AstroEngine.Body.Moon));
-      let nextLunarMonth: number = Number(this.getRashi(this.getDateObj(nextFullMoon['date']), AstroEngine.Body.Moon));
-      masaObj['isPurnimantaLeapMonth'] = currentLunarMonth === nextLunarMonth;
-      masaObj['purnimantaMasa'] = currentLunarMonth + 8;
-      masaObj['purnimantaMasa'] = masaObj['purnimantaMasa'] > 12 ? (masaObj['purnimantaMasa'] % 12) : masaObj['purnimantaMasa'];
+    if(lastFullMoon && lastNewMoon){
+      if(lastNewMoon['date'].getTime() < lastFullMoon['date'].getTime() && dateObj["dateObj"].getTime() > lastFullMoon['date'].getTime()){
+        masaObj['purnimantaMasa'] = masaObj['amantaMasa']+1;
+        masaObj['purnimantaMasa'] = masaObj['purnimantaMasa'] > 12 ? (masaObj['purnimantaMasa'] % 12) : masaObj['purnimantaMasa'];
+      }else{
+        masaObj['purnimantaMasa'] = masaObj['amantaMasa'];
+      }
       masaObj['purnimantaRitu'] = Math.ceil(masaObj['purnimantaMasa'] / 2);
     }
     
