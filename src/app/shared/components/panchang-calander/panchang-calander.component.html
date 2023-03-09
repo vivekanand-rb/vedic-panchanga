@@ -1,0 +1,48 @@
+<div>
+<h2 class="mb-4">Full Calendar</h2>
+<div class="card">
+  <div class="card-body p-0">
+    <div id="calendar" class="fc fc-bootstrap4 fc-ltr">
+      <div class="fc-toolbar fc-header-toolbar">
+        <div class="fc-left">
+          <h2>March 2023</h2>
+        </div>
+        <div class="fc-right">
+          <div class="btn-group">
+            <button type="button" class="fc-prev-button btn btn-primary" aria-label="prev">
+              <span class="fa fa-chevron-left"></span>
+            </button>
+            <button type="button" class="fc-next-button btn btn-primary" aria-label="next">
+              <span class="fa fa-chevron-right"></span>
+            </button>
+          </div>
+        </div>
+        <div class="fc-center">
+        </div>
+      </div>
+      <div class="fc-view-container">
+        <div class="fc-month-view">
+          <table class="calander">
+           <tbody>
+            <tr >
+              <thead>
+              <th class="fc-day-header"><span>Sun</span></th>
+              <th class="fc-day-header"><span>Mon</span></th>
+              <th class="fc-day-header"><span>Tue</span></th>
+              <th class="fc-day-header"><span>Wed</span></th>
+              <th class="fc-day-header"><span>Thu</span></th>
+              <th class="fc-day-header"><span>Fri</span></th>
+              <th class="fc-day-header"><span>Sat</span></th>
+            </thead>
+           </tr>
+            <tr *ngFor="let week of calanderMonthArray">
+                <td *ngFor="let day of week">{{day ? day['date']['date']: '.'}}</td>
+           </tr>
+           </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

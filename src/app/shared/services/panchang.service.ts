@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, switchMap } from 'rxjs';
+import { PanchangMapService } from '@shared/services/panchangMap.service';
 import * as AstroEngine from 'astronomy-engine';
 @Injectable({
   providedIn: 'root'
@@ -8,7 +9,7 @@ import * as AstroEngine from 'astronomy-engine';
 export class PanchangService {
   private panchangObj: { [key: string]: any } = {};
 
-  constructor(private _http: HttpClient) { }
+  constructor(private _http: HttpClient, private _panchangMapService: PanchangMapService) { }
 
   getPanchang(date: Date): object {
     this.panchangObj = {};
@@ -30,6 +31,7 @@ export class PanchangService {
     this.panchangObj["rashiObj"] = { 'moon': this.getEntityOcuurencesTillDateEnd(this.getRashi, [this.panchangObj['date'], AstroEngine.Body.Moon, this.panchangObj["relativeMotionOffsets"]], this.panchangObj["date"]["dateWith24Hours"], 'rashi'), 'sun': this.getEntityOcuurencesTillDateEnd(this.getRashi, [this.panchangObj['date'], AstroEngine.Body.Sun, this.panchangObj["relativeMotionOffsets"]], this.panchangObj["date"]["dateWith24Hours"], 'rashi') };
     this.panchangObj["masaObj"] = this.getMasa(this.panchangObj["tithiObj"][0]['tithi'], this.panchangObj["date"]);
     this.panchangObj["calSystemObj"] = this.getCalenderSystem(this.panchangObj["date"]['dateObj']);
+    this.panchangObj = this._panchangMapService.mapPanchangObj(this.panchangObj);
     return this.panchangObj;
   }
 
@@ -285,7 +287,7 @@ export class PanchangService {
     });
 
     nakshatraObj['nakshatra'] = Math.ceil(relativeLongitudes[0] * 27 / 360);
-    nakshatraObj['nakshatraCharana'] = this.getNakshartraCharana(relativeLongitudes[0]);
+    nakshatraObj['nakshatraCharana'] = this.getNakshartraCharana(relativeLongitudes[0], offsets, relativeLongitudes, dateObj['dateObj']);
     relativeLongitudes = this.unwrapAngles(relativeLongitudes);
     let approxEnd: number = this.inverseLagrange(offsets, relativeLongitudes, nakshatraObj['nakshatra'] * 360 / 27) * 24;
     nakshatraObj['nakshatraEndTime'] = new Date(dateObj['timeStamp'] + this.convertHoursToMilliseconds(approxEnd)['millisec']);
@@ -305,12 +307,24 @@ export class PanchangService {
   }
 
   /* tested */
-  getNakshartraCharana(longitude: number): number {
+  getNakshartraCharana(longitude: number, offsets?:Array<number>, relativeLongitudes?:Array<number>, date?:Date): number {
     let oneNakshatraDegreeSpan: number = (360 / 27);
     let oneCharanaDegreeSpan: number = (360 / 108);
     let nakshatra: number = Math.trunc(longitude / oneNakshatraDegreeSpan) + 1;
     let degreeLeft: number = ((nakshatra * oneNakshatraDegreeSpan) - longitude);
     let charana: number = Math.abs(Math.trunc((oneNakshatraDegreeSpan - degreeLeft) / oneCharanaDegreeSpan)) + 1;
+   
+ 
+    if(offsets && relativeLongitudes && date){
+      let charanaCovered = (nakshatra * oneNakshatraDegreeSpan);
+      let naksatraCharana =  [charanaCovered, charanaCovered-oneCharanaDegreeSpan, charanaCovered-(oneCharanaDegreeSpan*2), charanaCovered-(oneCharanaDegreeSpan*3)]
+      let charanaEndTime = naksatraCharana.map((element)=>{
+        let approxEnd: number = this.inverseLagrange(offsets, relativeLongitudes, element) * 24;
+        return  new Date(date.getTime() + this.convertHoursToMilliseconds(approxEnd)['millisec']);
+      });
+    console.log('....',charanaEndTime)
+    }
+   
     return charana;
   }
 

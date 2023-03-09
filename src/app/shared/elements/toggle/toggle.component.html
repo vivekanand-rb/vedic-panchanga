@@ -1,0 +1,6 @@
+<label class="toggle">
+    <input class="toggle-checkbox" type="checkbox" (change)="selectionChanged()">
+    <div class="toggle-switch"></div>
+    <span class="toggle-label" *ngIf="!selection">{{displayValues[0]}}</span>
+    <span class="toggle-label" *ngIf="selection">{{displayValues[1]}}</span>
+</label>
