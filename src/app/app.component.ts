@@ -5,7 +5,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  public viewCalander: boolean = false;
+  public viewCalander: boolean = true;
 
   constructor() {
   }

@@ -1,11 +1,67 @@
 .calander {
-    tr {
-        display: block;
-        float: left;
+    width: 100%;
+    text-align: center;
+    .weekday{
+        width: 14.28%;
+        height: 40px;
+        background-color:darksalmon;
+        border: 1px solid rgb(208, 133, 108);
+    }
+    
+    .day{
+        width: 14.28%;
+        height: 100px;
+        background-color: bisque;
+        border: 1px solid darksalmon;
+        cursor: pointer;
     }
 
-    th,
-    td {
-        display: block;
+    .todays-date{
+        @extend .day;
+        background-color: rgba(234, 208, 178, 0.7);
+        opacity: 0.8;
     }
+
+    .week-start-day{
+        @extend .day;
+        background-color: rgba(234, 197, 178, 0.7);
+        opacity: 0.8;
+    }
+
+
+    // ------------------------------------------------------
+    .event-day{
+        @extend .day;
+        background-color: rgba(234, 197, 178, 0.7);
+        opacity: 0.8;
+    }
+
+    .today-week-start-day{
+        @extend .day;
+        background-color: rgba(234, 197, 178, 0.7);
+        opacity: 0.8;
+    }
+
+    .event-week-start-day{
+        @extend .day;
+        background-color: rgba(234, 197, 178, 0.7);
+        opacity: 0.8;
+    }
+
+    .event-today-day{
+        @extend .day;
+        background-color: rgba(234, 197, 178, 0.7);
+        opacity: 0.8;
+    }
+
+    .event-week-start-today-day{
+        @extend .day;
+        background-color: rgba(234, 197, 178, 0.7);
+        opacity: 0.8;
+    }
+
+
+ 
+    
 }
+

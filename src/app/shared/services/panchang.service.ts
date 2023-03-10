@@ -322,7 +322,7 @@ export class PanchangService {
         let approxEnd: number = this.inverseLagrange(offsets, relativeLongitudes, element) * 24;
         return  new Date(date.getTime() + this.convertHoursToMilliseconds(approxEnd)['millisec']);
       });
-    console.log('....',charanaEndTime)
+    // console.log('....',charanaEndTime);
     }
    
     return charana;
