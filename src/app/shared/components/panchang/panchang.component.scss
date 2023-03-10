@@ -1,3 +1,33 @@
-.px-1{
-    padding-right: 1em;
+
+.panchang {
+    width: 100%;
+    th {
+        text-align: center;
+        background-color: darksalmon;
+        .form-control {
+            display: inline-block;
+            width: auto;
+            vertical-align: middle;
+            margin-left: 10%;
+            background-color: darksalmon;
+        }
+    };
+    tbody tr {
+        border: 1px solid rgb(208, 133, 108);
+        background-color: bisque;
+        font-size: medium;
+        label {
+            text-align: left;
+            margin-left: 1%;
+            color: brown;
+        }
+        .entity {
+            text-align: right;
+            label {
+                margin-right: 4%;
+            }
+            border-right: 1px solid rgb(208, 133, 108);
+        }
+    };
+
 }

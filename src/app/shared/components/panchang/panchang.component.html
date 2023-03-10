@@ -1,131 +1,39 @@
-<div>
-<table class="table table-bordered px-5">
-    <thead>
-      <tr>
-        <th colspan="2" class="text-center" style="color: rgb(172, 66, 83);">{{panchangObject['date']['dateObj']}} <span style="margin-left: 3%;"><button (click)="getView()">Refresh</button></span><span style="margin-left: 3%;"><input type="datetime-local" (change)="getView($event)" /></span></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="text-align: right; width: 50%;">Location</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['locationObj']['city']}}, {{panchangObject['locationObj']['regionName']}},  {{panchangObject['locationObj']['country']}}</span><span>Elevation: </span><span>{{panchangObject['locationObj']['elevation']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Sun Rise & Set Time</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['sunRiseSet']['riseString']}},</span><span class="px-1" style="color: green;">{{panchangObject['sunRiseSet']['setString']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Moon Rise & Set Time</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['moonRiseSet']['riseString']}},</span><span class="px-1" style="color: green;">{{panchangObject['moonRiseSet']['setString']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Day Duration</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['dayDuration']['dayDurationString']}} </span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Night Duration</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['dayDuration']['nightDurationString']}} </span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Weekday</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['date']['dayMap']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Vedic Weekday</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['vedicDayObj']['vedicDayMap']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Vedic Time</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['vedicTimeObj']['vedicTime']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Pahara</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['dayDuration']['paharaMap']}} ({{panchangObject['dayDuration']['pahara']}}) </span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Paksha</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['tithiObj'][0]['pakshaMap']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Tithi</td>
-        <td style="width: 50%;">
-          <div *ngFor="let tithi of panchangObject['tithiObj']">
-           <td><span class="px-1" style="color: green;">{{tithi['tithiMap']}}</span> <span class="px-1" style="color: rgb(186, 84, 84);">{{tithi['tithiEnd']}}</span></td> <br />
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Nakshatra</td>
-        <td style="width: 50%;">
-        <div *ngFor="let nakshatra of panchangObject['nakshatraObj']">
-          <td><span class="px-1" style="color: green;">{{nakshatra['nakshatraMap'] }}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{nakshatra['nakshatraEndTime']}}</span></td><br/>
-        </div>
-        </td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Nakshatra Charana</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['nakshatraObj'][0]['nakshatraCharanaMap']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Yoga</td>
-        <td style="width: 50%;">
-          <div *ngFor="let yoga of panchangObject['yogaObj']">
-            <td><span class="px-1" style="color: green;">{{yoga['yogaMap'] }}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{yoga['yogaEndTime']}}</span></td><br/>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Karana</td>
-        <td style="width: 50%;">
-          <div *ngFor="let karana of panchangObject['karanaObj']">
-            <td><span class="px-1" style="color: green;">{{karana['karanaMap'] }}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{karana['karanaEndTime']}}</span></td><br/>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Sun Sign</td>
-        <td style="width: 50%;">
-          <div *ngFor="let rashi of panchangObject['rashiObj']['sun']">
-            <td><span class="px-1" style="color: green;">{{rashi['sunRashiMap'] }}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{rashi['rashiEndTime']}}</span></td><br/>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Moon Sign</td>
-        <td style="width: 50%;">
-          <div *ngFor="let rashi of panchangObject['rashiObj']['moon']">
-            <td><span class="px-1" style="color: green;">{{rashi['moonRashiMap'] }}</span>  <span class="px-1" style="color: rgb(186, 84, 84);">{{rashi['rashiEndTime']}}</span></td><br/>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Amanta Month</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['amantaMasaMap']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Purnimanta Month</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['purnimantaMasaMap']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;"> Ritu</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['amantaRituMap']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Sidereal Ritu</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['siderealRituMap']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Vedic Ayana</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['masaObj']['ayanaMap']}}</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Vikaram Samvat</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['calSystemObj']['vikramSamvat']}} ({{panchangObject['calSystemObj']['vikramSamvatSaraMap']}})</span></td>
-      </tr>
-      <tr>
-        <td style="text-align: right; width: 50%;">Saka Samvat</td>
-        <td style="text-align: left; width: 50%;"><span class="px-1" style="color: green;">{{panchangObject['calSystemObj']['sakaSamvat']}}  ({{panchangObject['calSystemObj']['sakaSamvatSaraMap']}})</span></td>
-      </tr>
+<div class="p-2">
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="panchang">
+        <tr>
+          <th colspan="8" class="p-1">{{panchangObject['date']['dateObj']}} 
+            <button class="btn btn-outline-secondary m-2" (click)="getView(null, true)">Refresh</button> 
+            <input class="form-control" type="datetime-local" [(ngModel)]="customDate" (change)="getView($event)" /></th>
+        </tr>
+      <tbody>
+      <tr><td colspan="4" class="entity"><label>Location</label></td><td><label>{{panchangObject['locationObj']['city']}}, {{panchangObject['locationObj']['regionName']}},  {{panchangObject['locationObj']['country']}}</label><label>Elevation: </label><label>{{panchangObject['locationObj']['elevation']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Sun Rise & Set Time</label></td><td><label>{{panchangObject['sunRiseSet']['riseString']}},</label><label>{{panchangObject['sunRiseSet']['setString']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Moon Rise & Set Time</label></td><td><label>{{panchangObject['moonRiseSet']['riseString']}},</label><label>{{panchangObject['moonRiseSet']['setString']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Day Duration</label></td><td><label>{{panchangObject['dayDuration']['dayDurationString']}} </label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Night Duration</label></td><td><label>{{panchangObject['dayDuration']['nightDurationString']}} </label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Weekday</label></td><td><label>{{panchangObject['date']['dayMap']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Vedic Weekday</label></td><td><label>{{panchangObject['vedicDayObj']['vedicDayMap']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Vedic Time</label></td><td><label>{{panchangObject['vedicTimeObj']['vedicTime']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Pahara</label></td><td><label>{{panchangObject['dayDuration']['paharaMap']}} ({{panchangObject['dayDuration']['pahara']}}) </label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Paksha</label></td><td><label>{{panchangObject['tithiObj'][0]['pakshaMap']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Tithi</label></td><td><ng-container *ngFor="let tithi of panchangObject['tithiObj']"><label>{{tithi['tithiMap']}}</label> <label>till</label> <label>{{tithi['tithiEnd']}}</label> <br/></ng-container></td></tr>
+      <tr><td colspan="4" class="entity"><label>Nakshatra</label></td><td><ng-container *ngFor="let nakshatra of panchangObject['nakshatraObj']"><label>{{nakshatra['nakshatraMap'] }}</label> <label>till</label> <label>{{nakshatra['nakshatraEndTime']}}</label><br/></ng-container></td></tr>
+      <tr><td colspan="4" class="entity"><label>Nakshatra Charana</label></td><td><label>{{panchangObject['nakshatraObj'][0]['nakshatraCharanaMap']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Yoga</label></td><td><ng-container *ngFor="let yoga of panchangObject['yogaObj']"><label>{{yoga['yogaMap'] }}</label> <label>till</label> <label>{{yoga['yogaEndTime']}}</label><br/></ng-container></td></tr>
+      <tr><td colspan="4" class="entity"><label>Karana</label></td><td><ng-container *ngFor="let karana of panchangObject['karanaObj']"><label>{{karana['karanaMap'] }}</label> <label>till</label> <label>{{karana['karanaEndTime']}}</label><br/></ng-container></td></tr>
+      <tr><td colspan="4" class="entity"><label>Sun Sign</label></td><td><ng-container *ngFor="let rashi of panchangObject['rashiObj']['sun']"><label>{{rashi['sunRashiMap'] }}</label> <label>till</label> <label>{{rashi['rashiEndTime']}}</label><br/></ng-container></td></tr>
+      <tr><td colspan="4" class="entity"><label>Moon Sign</label></td><td><ng-container *ngFor="let rashi of panchangObject['rashiObj']['moon']"><label>{{rashi['moonRashiMap'] }}</label> <label>till</label> <label>{{rashi['rashiEndTime']}}</label><br/></ng-container></td></tr>
+      <tr><td colspan="4" class="entity"><label>Amanta Month</label></td><td><label>{{panchangObject['masaObj']['amantaMasaMap']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Purnimanta Month</label></td><td><label>{{panchangObject['masaObj']['purnimantaMasaMap']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label> Ritu</label></td><td><label>{{panchangObject['masaObj']['amantaRituMap']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Sidereal Ritu</label></td><td><label>{{panchangObject['masaObj']['siderealRituMap']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Vedic Ayana</label></td><td><label>{{panchangObject['masaObj']['ayanaMap']}}</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Vikaram Samvat</label></td><td><label>{{panchangObject['calSystemObj']['vikramSamvat']}} ({{panchangObject['calSystemObj']['vikramSamvatSaraMap']}})</label></td></tr>
+      <tr><td colspan="4" class="entity"><label>Saka Samvat</label></td><td><label>{{panchangObject['calSystemObj']['sakaSamvat']}}  ({{panchangObject['calSystemObj']['sakaSamvatSaraMap']}})</label></td></tr>
     </tbody>
-  </table>
-</div>
+    </table>
+    </div>
+    </div>
+    </div>

@@ -13,6 +13,7 @@ export class PanchangCalanderComponent implements OnInit {
   public selectedMonth: number = 0;
   public selectedYear: number = 0;
   public monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  public showSetting: boolean = false; 
 
   constructor(private _panchangService: PanchangService) { }
 
