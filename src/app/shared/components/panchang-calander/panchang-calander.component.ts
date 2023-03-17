@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { PanchangService } from '@shared/services/panchang.service';
-
+import { LocationService } from '@shared/services/location.service';
 @Component({
   selector: 'panchang-calander-component',
   templateUrl: './panchang-calander.component.html',
@@ -8,6 +8,15 @@ import { PanchangService } from '@shared/services/panchang.service';
 })
 export class PanchangCalanderComponent implements OnInit {
 
+  @Input()
+   set refresh(locationUpdateTimeStamp: number) {
+    if(locationUpdateTimeStamp){
+      this.locationObj = this._locationService.getLocationObj();
+      this.getMonthDays(this.selectedYear, this.selectedMonth);
+    }
+  }
+
+  private locationObj: { [key: string]: any } = {};
   public calanderMonthArray: any = [];
   public todaysDate: Date = new Date();
   public selectedMonth: number = 0;
@@ -15,9 +24,10 @@ export class PanchangCalanderComponent implements OnInit {
   public monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   public showSetting: boolean = false; 
 
-  constructor(private _panchangService: PanchangService) { }
+  constructor( private _locationService: LocationService, private _panchangService: PanchangService) { }
 
   ngOnInit(): void {
+    this.locationObj = this._locationService.getLocationObj();
     this.selectedYear = this.todaysDate.getFullYear();
     this.selectedMonth = this.todaysDate.getMonth();
     this.getMonthDays(this.selectedYear, this.selectedMonth);
@@ -42,7 +52,7 @@ export class PanchangCalanderComponent implements OnInit {
 
   getMonthDays(year: number, month: number): void {
     this.calanderMonthArray = [];
-
+    
     let startDay: Date = new Date(year, month, 1);
     let endDay: Date = new Date(year, month + 1, 0);
     let monthDayList: Array<{ [key: string]: any }> = new Array(startDay.getDay());
@@ -52,7 +62,7 @@ export class PanchangCalanderComponent implements OnInit {
         this.calanderMonthArray.push(monthDayList);
         monthDayList = [];
       }
-      monthDayList.push(this._panchangService.getPanchang(new Date(year, month, day)));
+      monthDayList.push(this._panchangService.getPanchang(new Date(year, month, day), this.locationObj));
     }
     monthDayList.push(... new Array(7 - monthDayList.length));
     this.calanderMonthArray.push(monthDayList);

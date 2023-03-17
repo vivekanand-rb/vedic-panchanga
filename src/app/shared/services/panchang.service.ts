@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, switchMap } from 'rxjs';
 import { PanchangMapService } from '@shared/services/panchangMap.service';
 import * as AstroEngine from 'astronomy-engine';
 @Injectable({
@@ -9,11 +7,11 @@ import * as AstroEngine from 'astronomy-engine';
 export class PanchangService {
   private panchangObj: { [key: string]: any } = {};
 
-  constructor(private _http: HttpClient, private _panchangMapService: PanchangMapService) { }
+  constructor( private _panchangMapService: PanchangMapService) { }
 
-  getPanchang(date: Date): object {
+  getPanchang(date: Date, locationObj: { [key: string]: any } ): object {
     this.panchangObj = {};
-    this.getAndAssignLocationObj(this.panchangObj);
+    this.panchangObj["locationObj"] = locationObj;
     this.panchangObj["relativeMotionOffsets"] = [0.00, 0.25, 0.50, 0.75, 1.00];
     this.panchangObj["date"] = this.getDateObj(date, true);
     this.panchangObj["observer"] = this.getAstroObserver(this.panchangObj['locationObj']['lat'], this.panchangObj['locationObj']['lon'], this.panchangObj['locationObj']['elevation']);
@@ -521,18 +519,6 @@ export class PanchangService {
       timeStamp: date.getTime(),
       timezoneOffset: date.getTimezoneOffset(),
       astroDate: this.getAstroDate(date)
-    }
-  }
-
-  async getAndAssignLocationObj(assignableObjRef: { [key: string]: any }) {
-    if (!sessionStorage.getItem('locationObject')) {
-      //TODO:  To be replaced by library to get location info.
-      const loacationResponse: any = await firstValueFrom(this._http.get("http://ip-api.com/json"));
-      loacationResponse['elevation'] = 0.02
-      sessionStorage.setItem('locationObject', JSON.stringify(loacationResponse));
-      assignableObjRef["locationObj"] = loacationResponse;
-    } else {
-      assignableObjRef["locationObj"] = JSON.parse(String(sessionStorage.getItem('locationObject')));
     }
   }
 

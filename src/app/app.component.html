@@ -1,6 +1,9 @@
-<div class="container">
+<div class="container" *ngIf="locationLoaded">
   <div class="row">
-    <div class="col-10"></div>
+    <div class="col-9"></div>
+    <div class="col-1">
+      <label class="location" (click)="modifyLocationObj=!modifyLocationObj">📍</label>
+    </div>
     <div class="col-2">
       <panchang-toggle  [displayValues]="['Month View', 'Day View']" (valueChanged)="viewCalander=!viewCalander"></panchang-toggle>
     </div>
@@ -11,3 +14,9 @@
     <panchang-component *ngIf="!viewCalander"></panchang-component>
   </div>
 </div>
+
+<!--  location load-->
+<panchang-location-load *ngIf="!locationLoaded" (locationServiceCallCompleted)="locationCallCompleted($event)"></panchang-location-load>
+
+<!-- location modify modal -->
+<panchang-location-modify-component *ngIf="modifyLocationObj" (closed)="modifyLocationObj=!modifyLocationObj"></panchang-location-modify-component>
