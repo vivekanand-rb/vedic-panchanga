@@ -1,1 +1,25 @@
-.modal{background: rgba(0,0,0, .5);}
+.modal {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.modal-header {
+    background-color: darksalmon;
+}
+
+.modal-footer {
+    background-color: darksalmon;
+}
+
+.modal-body {
+    background-color: bisque;
+
+}
+
+.btn-primary {
+    background-color: rgb(247, 154, 79);
+    border-color: bisque;
+}
+
+.info-section {
+    background-color: rgb(245, 211, 170);
+}
