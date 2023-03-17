@@ -26,8 +26,16 @@
         </thead>
         <tbody>
           <tr *ngFor="let week of calanderMonthArray">
-            <td class="day" *ngFor="let day of week; let i = index"  [ngClass]="[(day && day['date']['todaysDate']) ? 'todays-date' : 'day', i === 0 ? 'week-start-day' : 'day']" (click)="dayClicked(day)">{{day ? day['date']['date']: ''}}</td>
-          </tr>
+            <td class="day" *ngFor="let day of week; let i = index" [ngClass]="[
+                        (day && day['date']['todaysDate']) ? 'today' : 'day',
+                        i === 0 ? 'sunday' : 'day', 
+                        (day && day['events']) ? 'event' : 'day',
+                        ((day && day['date']['todaysDate']) &&  i === 0) ? 'today-sunday' : 'day',
+                        ((day && day['date']['todaysDate']) &&  day['events']) ? 'today-event' : 'day',
+                        ((day && day['events']) &&   i === 0) ? 'sunday-event' : 'day',
+                        ((day && day['events'] && day['date']['todaysDate']) &&   i === 0) ? 'today-sunday-event' : 'day']"
+              (click)="dayClicked(day)">{{day ? day['date']['date']: ''}}</td>
+            </tr>
         </tbody>
       </table>
     </div>

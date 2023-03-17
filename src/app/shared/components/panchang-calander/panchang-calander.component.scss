@@ -1,6 +1,7 @@
 .calander {
     width: 100%;
     text-align: center;
+    
     .weekday{
         width: 14.28%;
         height: 40px;
@@ -16,51 +17,49 @@
         cursor: pointer;
     }
 
-    .todays-date{
+    .today{
         @extend .day;
         background-color: rgba(234, 208, 178, 0.7);
         opacity: 0.8;
     }
 
-    .week-start-day{
+    .sunday{
         @extend .day;
         background-color: rgba(234, 197, 178, 0.7);
         opacity: 0.8;
     }
 
-
-    // ------------------------------------------------------
-    .event-day{
+    .event{
         @extend .day;
-        background-color: rgba(234, 197, 178, 0.7);
+        background-color: rgba(223, 132, 173, 0.7);
         opacity: 0.8;
     }
 
-    .today-week-start-day{
+   
+    .today-sunday{
         @extend .day;
-        background-color: rgba(234, 197, 178, 0.7);
-        opacity: 0.8;
+        background:  linear-gradient(35deg, rgba(234, 197, 178, 0.7), rgba(234, 208, 178, 0.7));
+        opacity: 0.9;
     }
 
-    .event-week-start-day{
+    .today-event{
         @extend .day;
-        background-color: rgba(234, 197, 178, 0.7);
-        opacity: 0.8;
+        background: linear-gradient(35deg, rgba(234, 208, 178, 0.7), rgba(223, 132, 173, 0.7));
+        opacity: 0.9;
     }
 
-    .event-today-day{
+    .sunday-event{
         @extend .day;
-        background-color: rgba(234, 197, 178, 0.7);
-        opacity: 0.8;
-    }
-
-    .event-week-start-today-day{
-        @extend .day;
-        background-color: rgba(234, 197, 178, 0.7);
-        opacity: 0.8;
+        background: linear-gradient(35deg, rgba(234, 197, 178, 0.7), rgba(223, 132, 173, 0.7));
+        opacity: 0.9;
     }
 
 
+    .today-sunday-event{
+        @extend .day;
+        background: linear-gradient(35deg, rgba(234, 197, 178, 0.7), rgba(234, 208, 178, 0.7), rgba(223, 132, 173, 0.7));
+        opacity: 0.9;
+    }
  
     
 }
