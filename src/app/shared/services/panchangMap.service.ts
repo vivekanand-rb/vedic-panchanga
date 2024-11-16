@@ -61,7 +61,7 @@ export class PanchangMapService {
     panchangObject['date']['dayMap'] = this.days[(panchangObject['date']['day'] + 1)];
     panchangObject['vedicDayObj']['vedicDayMap'] = this.vedicDays[panchangObject['vedicDayObj']['day']];
     panchangObject['tithiObj'].forEach((element: any) => { element['pakshaMap'] = this.paksha[element['paksha']]; element['tithiMap'] = this.tithi[element['tithi']]; });
-    panchangObject['nakshatraObj'].forEach((element: any) => { element['nakshatraMap'] = this.nakshatra[element['nakshatra']]; element['nakshatraCharanaMap'] = this.charana[element['nakshatraCharana']]; });
+    panchangObject['nakshatraObj'].forEach((element: any) => { element['nakshatraMap'] = this.nakshatra[element['nakshatra']]; element['nakshatraCharanaMap'] = this.charana[element['nakshatraCharana']['charana']]; });
     panchangObject['yogaObj'].forEach((element: any) => { element['yogaMap'] = this.yoga[element['yog']]; });
     panchangObject['karanaObj'].forEach((element: any) => { element['karanaMap'] = this.karana[element['karana']]; });
     panchangObject['rashiObj']['moon'].forEach((element: any) => { element['moonRashiMap'] = this.rashi[element['rashi']]; }); 

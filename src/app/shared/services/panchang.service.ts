@@ -7,9 +7,9 @@ import * as AstroEngine from 'astronomy-engine';
 export class PanchangService {
   private panchangObj: { [key: string]: any } = {};
 
-  constructor( private _panchangMapService: PanchangMapService) { }
+  constructor(private _panchangMapService: PanchangMapService) { }
 
-  getPanchang(date: Date, locationObj: { [key: string]: any } ): object {
+  getPanchang(date: Date, locationObj: { [key: string]: any }): object {
     this.panchangObj = {};
     this.panchangObj["locationObj"] = locationObj;
     this.panchangObj["relativeMotionOffsets"] = [0.00, 0.25, 0.50, 0.75, 1.00];
@@ -29,6 +29,10 @@ export class PanchangService {
     this.panchangObj["rashiObj"] = { 'moon': this.getEntityOcuurencesTillDateEnd(this.getRashi, [this.panchangObj['date'], AstroEngine.Body.Moon, this.panchangObj["relativeMotionOffsets"]], this.panchangObj["date"]["dateWith24Hours"], 'rashi'), 'sun': this.getEntityOcuurencesTillDateEnd(this.getRashi, [this.panchangObj['date'], AstroEngine.Body.Sun, this.panchangObj["relativeMotionOffsets"]], this.panchangObj["date"]["dateWith24Hours"], 'rashi') };
     this.panchangObj["masaObj"] = this.getMasa(this.panchangObj["tithiObj"][0]['tithi'], this.panchangObj["date"]);
     this.panchangObj["calSystemObj"] = this.getCalenderSystem(this.panchangObj["date"]['dateObj']);
+    this.panchangObj["mahuratam"] = this.getAllMahuratas();
+    this.panchangObj["vasa"] = this.getVasa(this.panchangObj["tithiObj"], this.panchangObj["vedicDayObj"]["day"]);
+    this.panchangObj["dishaShula"] = this.getDishaSulam(this.panchangObj["vedicDayObj"]["day"]);
+
     this.panchangObj = this._panchangMapService.mapPanchangObj(this.panchangObj);
     return this.panchangObj;
   }
@@ -56,9 +60,9 @@ export class PanchangService {
   /* tested */
   getCalenderSystem(date: Date): { [key: string]: any } {
     let year = date.getFullYear();
-    let indianCalanderStartMonth =  new Date(date.getFullYear(), 2, 1);
+    let indianCalanderStartMonth = new Date(date.getFullYear(), 2, 1);
     let fullMoonYearEndTime: AstroEngine.AstroTime | null = AstroEngine.SearchMoonPhase(180, indianCalanderStartMonth, 30);
-    let newMoonYearEndTime: AstroEngine.AstroTime | null = fullMoonYearEndTime ? AstroEngine.SearchMoonPhase(0, fullMoonYearEndTime['date'], 16): null;
+    let newMoonYearEndTime: AstroEngine.AstroTime | null = fullMoonYearEndTime ? AstroEngine.SearchMoonPhase(0, fullMoonYearEndTime['date'], 16) : null;
     let calenderSystem: { [key: string]: any } = { 'vikramSamvat': 0, 'sakaSamvat': 0 };
 
     if (newMoonYearEndTime) {
@@ -77,15 +81,14 @@ export class PanchangService {
       }
     }
 
-    calenderSystem['vikramSamvatSara'] =  ((calenderSystem['vikramSamvat'] + 9 ) % 60) + 1; 
-    calenderSystem['sakaSamvatSara'] =  ((calenderSystem['sakaSamvat'] + 11) % 60) + 1;
+    calenderSystem['vikramSamvatSara'] = ((calenderSystem['vikramSamvat'] + 9) % 60) + 1;
+    calenderSystem['sakaSamvatSara'] = ((calenderSystem['sakaSamvat'] + 11) % 60) + 1;
 
     return calenderSystem;
   }
 
-  /* tested */
+  /* tested */ //not working
   getDayDuration(sunRiseSetTime: { [key: string]: any }, date: Date, dateWithZeroHr: Date, observer: AstroEngine.Observer): { [key: string]: any } {
-
     let timeDuration: number = date.getTime() - sunRiseSetTime['rise']['date'].getTime();
     let currentSunRiseSet: { [key: string]: any }, nextSunRiseSet: { [key: string]: any };
     if (timeDuration < 0) {
@@ -104,6 +107,8 @@ export class PanchangService {
     const dayDuration: number = currentSunRiseSet['set']['date'].getTime() - currentSunRiseSet['rise']['date'].getTime();
     timeDuration = date.getTime() - currentSunRiseSet['rise']['date'].getTime();
     const nightDuration: number = totalDuration - dayDuration;
+    // const nightDuration: number = nextSunRiseSet['rise']['date'].getTime() - currentSunRiseSet['set']['date'].getTime();
+
     let pahara: number;
 
     if (timeDuration - dayDuration) {
@@ -113,11 +118,13 @@ export class PanchangService {
     }
 
     let durationObj: { [key: string]: any } = {
-      'dayDurationInMillSec': dayDuration,
+      'dayDurationInMilliSec': dayDuration,
       'nightDurationInMilliSec': nightDuration,
       'dayDuration': this.convertHoursToMilliseconds(Number((((dayDuration / 1000) / 60) / 60)))['HrMinSec'],
       'nightDuration': this.convertHoursToMilliseconds(Number((((nightDuration / 1000) / 60) / 60)))['HrMinSec'],
-      'pahara': pahara
+      'pahara': pahara,
+      'nextDaySunRiseSetAstroObj': nextSunRiseSet,
+      'currentDaySunRiseSetAstroObj': currentSunRiseSet
     }
     durationObj['dayDurationString'] = durationObj['dayDuration'][0] + ' Hrs, ' + durationObj['dayDuration'][1] + ' Min, ' + durationObj['dayDuration'][2] + ' Sec'
     durationObj['nightDurationString'] = durationObj['nightDuration'][0] + ' Hrs, ' + durationObj['nightDuration'][1] + ' Min, ' + durationObj['nightDuration'][2] + ' Sec'
@@ -141,16 +148,16 @@ export class PanchangService {
       masaObj['amantaRitu'] = Math.ceil(masaObj['amantaMasa'] / 2);
     }
 
-    if(lastFullMoon && lastNewMoon){
-      if(lastNewMoon['date'].getTime() < lastFullMoon['date'].getTime() && dateObj["dateObj"].getTime() > lastFullMoon['date'].getTime()){
-        masaObj['purnimantaMasa'] = masaObj['amantaMasa']+1;
+    if (lastFullMoon && lastNewMoon) {
+      if (lastNewMoon['date'].getTime() < lastFullMoon['date'].getTime() && dateObj["dateObj"].getTime() > lastFullMoon['date'].getTime()) {
+        masaObj['purnimantaMasa'] = masaObj['amantaMasa'] + 1;
         masaObj['purnimantaMasa'] = masaObj['purnimantaMasa'] > 12 ? (masaObj['purnimantaMasa'] % 12) : masaObj['purnimantaMasa'];
-      }else{
+      } else {
         masaObj['purnimantaMasa'] = masaObj['amantaMasa'];
       }
       masaObj['purnimantaRitu'] = Math.ceil(masaObj['purnimantaMasa'] / 2);
     }
-    
+
     masaObj['siderealRituObj'] = this.getRituOfYear(dateObj["dateObj"].getFullYear(), dateObj["dateObj"]);
     masaObj['siderealRitu'] = masaObj['siderealRituObj']['ritu'];
     masaObj['ayana'] = this.getAyana(dateObj["dateObj"]);
@@ -161,14 +168,14 @@ export class PanchangService {
   getRituOfYear(year: number, date?: Date): { [key: string]: any } {
     let rituTargetLon: { [key: string]: number } = { '2': 330, '4': 30, '6': 90, '8': 150, '10': 210, '12': 270 }
     let getRituTime = (targetLon: number, month: number, day: number) => {
-      let startDate:Date = new Date(Date.UTC(year, month - 1, day));
+      let startDate: Date = new Date(Date.UTC(year, month - 1, day));
       let time: AstroEngine.AstroTime | null = AstroEngine.SearchSunLongitude(targetLon, startDate, 27);
       return time;
     }
 
     let rituStartTimeList: Array<AstroEngine.AstroTime | null> = [getRituTime(rituTargetLon[2], 2, 1), getRituTime(rituTargetLon[4], 4, 1), getRituTime(rituTargetLon[6], 6, 1), getRituTime(rituTargetLon[8], 8, 1), getRituTime(rituTargetLon[10], 10, 1), getRituTime(rituTargetLon[12], 12, 1)];
     if (date) {
-      let ritu:number = 6;
+      let ritu: number = 6;
       rituStartTimeList.forEach((astroTime: AstroEngine.AstroTime | null, index: number) => {
         if (astroTime && date.getTime() >= astroTime['date'].getTime()) {
           ritu = index + 1;
@@ -305,25 +312,30 @@ export class PanchangService {
   }
 
   /* tested */
-  getNakshartraCharana(longitude: number, offsets?:Array<number>, relativeLongitudes?:Array<number>, date?:Date): number {
+  getNakshartraCharana(longitude: number, offsets?: Array<number>, relativeLongitudes?: Array<number>, date?: Date): { [key: string]: any } {
     let oneNakshatraDegreeSpan: number = (360 / 27);
     let oneCharanaDegreeSpan: number = (360 / 108);
     let nakshatra: number = Math.trunc(longitude / oneNakshatraDegreeSpan) + 1;
     let degreeLeft: number = ((nakshatra * oneNakshatraDegreeSpan) - longitude);
     let charana: number = Math.abs(Math.trunc((oneNakshatraDegreeSpan - degreeLeft) / oneCharanaDegreeSpan)) + 1;
-   
- 
-    if(offsets && relativeLongitudes && date){
+
+
+    let charanaTimes: Array<Date> = [];
+    if (offsets && relativeLongitudes && date) {
+      let approxStart: number = this.inverseLagrange(offsets, relativeLongitudes, nakshatra) * 24;
+      let nakshatraStartTime = new Date(date.getTime() + this.convertHoursToMilliseconds(approxStart)['millisec']);
+      console.log('....', nakshatraStartTime);
+
       let charanaCovered = (nakshatra * oneNakshatraDegreeSpan);
-      let naksatraCharana =  [charanaCovered, charanaCovered-oneCharanaDegreeSpan, charanaCovered-(oneCharanaDegreeSpan*2), charanaCovered-(oneCharanaDegreeSpan*3)]
-      let charanaEndTime = naksatraCharana.map((element)=>{
+      let naksatraCharana = [charanaCovered, charanaCovered - oneCharanaDegreeSpan, charanaCovered - (oneCharanaDegreeSpan * 2), charanaCovered - (oneCharanaDegreeSpan * 3), charanaCovered - (oneCharanaDegreeSpan * 4)]
+      charanaTimes = naksatraCharana.map((element) => {
         let approxEnd: number = this.inverseLagrange(offsets, relativeLongitudes, element) * 24;
-        return  new Date(date.getTime() + this.convertHoursToMilliseconds(approxEnd)['millisec']);
+        return new Date(date.getTime() + this.convertHoursToMilliseconds(approxEnd)['millisec']);
       });
-    // console.log('....',charanaEndTime);
+      console.log('....',);
     }
-   
-    return charana;
+
+    return { charana, charanaTimes };
   }
 
 
@@ -521,5 +533,245 @@ export class PanchangService {
       astroDate: this.getAstroDate(date)
     }
   }
+
+
+
+
+
+  // --------------------- Mahuratas --------------------------
+
+  //  pass prevous sun rise if current time is before sun rise
+
+  getAllMahuratas(): { [key: string]: any } {
+
+    return {
+      "abhijitMahuratam": this.getAbhijitMahuratam(this.panchangObj["sunRiseSet"], this.panchangObj["dayDuration"]),
+      "chaughadiyaMahuratam": this.getChaughadiyaMahuratam(this.panchangObj["sunRiseSet"], this.panchangObj["dayDuration"]),
+      "trikalam": this.getTrikalam(this.panchangObj["sunRiseSet"], this.panchangObj["dayDuration"], this.panchangObj["vedicDayObj"]["day"]),
+      "durMahuratam": this.getDurMahuratam(this.panchangObj["sunRiseSet"], this.panchangObj["dayDuration"], this.panchangObj["vedicDayObj"]["day"]),
+      "varjayam": this.getVarjayam(this.panchangObj["nakshatraObj"], this.panchangObj['date']['timeStamp'])
+    }
+
+  }
+
+  getAbhijitMahuratam(sunRiseSetObj: { [key: string]: any }, dayDiffernce: { [key: string]: any }): { startTimeInMilliSec: number, endTimeInMilliSec: number, startTime: Date, endTime: Date } {
+    const startTime = sunRiseSetObj['rise']['date'].getTime() + ((7 / 15) * dayDiffernce['dayDurationInMilliSec']);
+    const endTime = sunRiseSetObj['rise']['date'].getTime() + ((8 / 15) * dayDiffernce['dayDurationInMilliSec']);
+    const mahuratamObj = { startTimeInMilliSec: startTime, endTimeInMilliSec: endTime, startTime: new Date(startTime), endTime: new Date(endTime) };
+    return mahuratamObj;
+  }
+
+
+  getChaughadiyaMahuratam(sunRiseSetObj: { [key: string]: any }, dayDiffernce: { [key: string]: any }): { [key: string]: any } {
+    const mahuratasTimings: { [key: string]: Array<object> } = { 'day': [], 'night': [] };
+
+    for (let i = 0; i < 8; i++) {
+      let dayEndTime = sunRiseSetObj['rise']['date'].getTime() + ((i * dayDiffernce['dayDurationInMilliSec']) / 8);
+      mahuratasTimings['day'].push({ "endTimeinMilliSec": dayEndTime, endTime: new Date(dayEndTime) });
+      let nightEndTime = sunRiseSetObj['set']['date'].getTime() + ((i * dayDiffernce['nightDurationInMilliSec']) / 8);
+      mahuratasTimings['night'].push({ "endTimeinMilliSec": nightEndTime, endTime: new Date(nightEndTime) });
+    }
+    //  not correct ans nextday rise is wrong
+    mahuratasTimings['day'].push({ "endTimeinMilliSec": sunRiseSetObj['set']['date'].getTime(), endTime: sunRiseSetObj['set']['date'] });
+    mahuratasTimings['night'].push({ "endTimeinMilliSec": dayDiffernce['nextDaySunRiseSetAstroObj']['rise']['date'].getTime(), endTime: dayDiffernce['nextDaySunRiseSetAstroObj']['rise']['date'] });
+    return mahuratasTimings;
+  }
+
+  getTrikalam(sunRiseSetObj: { [key: string]: any }, dayDiffernce: { [key: string]: any }, weekday: number, option?: string): { [key: string]: any } {
+    const offsets: any = {
+      'rahu': [0.875, 0.125, 0.75, 0.5, 0.625, 0.375, 0.25],
+      'gulika': [0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0],
+      'yamaganda': [0.5, 0.375, 0.25, 0.125, 0.0, 0.75, 0.625]
+    }
+
+    if (option) {
+      const startTime = sunRiseSetObj['rise']['date'].getTime() + dayDiffernce['dayDurationInMilliSec'] * offsets[option][weekday];
+      const endTime = startTime + 0.125 * dayDiffernce['dayDurationInMilliSec'];
+      const mahuratamObj = { startTimeInMilliSec: startTime, endTimeInMilliSec: endTime, startTime: new Date(startTime), endTime: new Date(endTime) };
+      return mahuratamObj;
+    }
+
+    let trikalam = { 'rahuKalam': this.getTrikalam(sunRiseSetObj, dayDiffernce, weekday, 'rahu'), 'yamaganaKalam': this.getTrikalam(sunRiseSetObj, dayDiffernce, weekday, 'yamaganda'), 'gulikaKalam': this.getTrikalam(sunRiseSetObj, dayDiffernce, weekday, 'gulika') }
+    return trikalam;
+  }
+
+
+  getDurMahuratam(sunRiseSetObj: { [key: string]: any }, dayDiffernce: { [key: string]: any }, weekday: number) {
+    const offsets = [[10.4, 0.0], [6.4, 8.8], [2.4, 4.8], [5.6, 0.0], [4.0, 8.8], [2.4, 6.4], [1.6, 0.0]];
+    weekday = weekday - 1;
+    const dur = [dayDiffernce['dayDurationInMilliSec'], dayDiffernce['dayDurationInMilliSec']];
+    const base = [sunRiseSetObj['rise']['date'].getTime(), sunRiseSetObj['rise']['date'].getTime()];
+
+    if (weekday === 2) { dur[1] = dayDiffernce['nightDurationInMilliSec'] } else { base[1] = sunRiseSetObj['set']['date'].getTime() }
+
+    const startTimes: Array<any> = [0, 0];
+    const endTimes: Array<any> = [0, 0];
+
+    for (let i = 0; i < 2; i++) {
+      let offset = offsets[weekday][i];
+      if (offset !== 0.0) {
+        startTimes[i] = { "startTimeinMilliSec": (base[i] + dur[i] * offsets[weekday][i] / 12), startTime: new Date(base[i] + dur[i] * offsets[weekday][i] / 12) };
+        endTimes[i] = { "endTimeinMilliSec": (startTimes[i]["startTime"].getTime() + dayDiffernce['dayDurationInMilliSec'] * 0.8 / 12), endTime: new Date(startTimes[i]["startTime"].getTime() + dayDiffernce['dayDurationInMilliSec'] * 0.8 / 12) };
+      }
+    }
+
+    return { startTimes, endTimes };
+  }
+
+
+
+  getDishaSulam(vedicWeekDay: number): number {
+    const dishashula: Array<number> = [2, 1, 3, 3, 4, 2, 1];
+    return dishashula[vedicWeekDay];
+  }
+
+  getVarjayam(nakshatraObj: Array<{ [key: string]: any }>, todaysDateInMilliSec: number): Array<{ [key: string]: any }> {
+    const startTimeBasedOnNakshatra: { [key: string]: any } = {
+      1: { name: 'Ashwini', time: 72000000 }, 2: { name: 'Bharani', time: 33696000 }, 3: { name: 'Krittika', time: 43200000 }, 4: { name: 'Rohini', time: 57600000 }, 5: { name: 'Mrigashira', time: 19296000 },
+      6: { name: 'Ardra', time: 29664000 }, 7: { name: 'Punarvasu', time: 43200000 }, 8: { name: 'Pushya', time: 28800000 }, 9: { name: 'Ashlesha', time: 44928000 }, 10: { name: 'Magha', time: 43200000 },
+      11: { name: 'Purva Phalguni', time: 28800000 }, 12: { name: 'Uttara Phalguni', time: 25632000 }, 13: { name: 'Hasta', time: 29664000 }, 14: { name: 'Chitra', time: 28800000 },
+      15: { name: 'Swati', time: 19296000 }, 16: { name: 'Vishakha', time: 19296000 }, 17: { name: 'Anuradha', time: 14400000 }, 18: { name: 'Jyeshtha', time: 19296000 }, 19: { name: 'Mula', time: 29664000 }, 20: { name: 'Purva Ashadha', time: 33696000 },
+      21: { name: 'Uttara Ashadha', time: 28800000 }, 22: { name: 'Shravana', time: 14400000 }, 23: { name: 'Dhanishtha', time: 14400000 }, 24: { name: 'Shatabhishak', time: 25632000 },
+      25: { name: 'Purva Bhadrapada', time: 22464000 }, 26: { name: 'Uttara Bhadrapada', time: 33696000 }, 27: { name: 'Revati', time: 43200000 }
+    };
+
+    const varjayam: Array<{ [key: string]: any }> = [];
+    nakshatraObj.map((nakshatra) => {
+      let charanTimesInMilliSec = nakshatra['nakshatraCharana']['charanaTimes'].map((element: Date) => element.getTime());
+      let durationOfNakshata = (charanTimesInMilliSec[0] - charanTimesInMilliSec[4]);
+      const startTime = charanTimesInMilliSec[4] + (startTimeBasedOnNakshatra[nakshatra['nakshatra']]['time'] / 86400000) * durationOfNakshata;
+      const endTime = startTime + (durationOfNakshata * (5760000 / 86400000));
+      varjayam.push({ startTime: new Date(startTime), endTime: new Date(endTime), isApplicableForToday: startTime >= todaysDateInMilliSec ? true : false });
+    })
+
+    return varjayam;
+  }
+
+  getVasa(tithiObj: { [key: string]: any }, vedicWeekDay: number): { [key: string]: any } {
+    const shaivaVasaIndex = ((tithiObj['tithi'] * 2) + 5) / 7;
+    const agniVasaIndex = (((tithiObj['tithi'] + 1) + (vedicWeekDay + 1)) - 4) / 3;
+    return { shaivaVasaIndex, agniVasaIndex, tithiEndTime: tithiObj['tithiEnd'] };
+  }
+
+
+  //   def gauri_chogadiya(jd, place):
+  //   lat, lon, tz = place
+  //   tz = place.timezone
+  //   srise = swe.rise_trans(jd - tz/24, swe.SUN, lon, lat, rsmi = _rise_flags + swe.CALC_RISE)[1][0]
+  //   sset = swe.rise_trans(jd - tz/24, swe.SUN, lon, lat, rsmi = _rise_flags + swe.CALC_SET)[1][0]
+  //   day_dur = (sset - srise)
+
+  //   end_times = []
+  //   for i in range(1, 9):
+  //     end_times.append(to_dms((srise + (i * day_dur) / 8 - jd) * 24 + tz))
+
+  //   # Night duration = time from today's sunset to tomorrow's sunrise
+  //   srise = swe.rise_trans((jd + 1) - tz/24, swe.SUN, lon, lat, rsmi = _rise_flags + swe.CALC_RISE)[1][0]
+  //   night_dur = (srise - sset)
+  //   for i in range(1, 9):
+  //     end_times.append(to_dms((sset + (i * night_dur) / 8 - jd) * 24 + tz))
+
+  //   return end_times
+
+  // def trikalam(jd, place, option='rahu'):
+  //   lat, lon, tz = place
+  //   tz = place.timezone
+  //   srise = swe.rise_trans(jd - tz/24, swe.SUN, lon, lat, rsmi = _rise_flags + swe.CALC_RISE)[1][0]
+  //   sset = swe.rise_trans(jd - tz/24, swe.SUN, lon, lat, rsmi = _rise_flags + swe.CALC_SET)[1][0]
+  //   day_dur = (sset - srise)
+  //   weekday = vaara(jd)
+
+  //   # value in each array is for given weekday (0 = sunday, etc.)
+  //   offsets = { 'rahu': [0.875, 0.125, 0.75, 0.5, 0.625, 0.375, 0.25],
+  //               'gulika': [0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0],
+  //               'yamaganda': [0.5, 0.375, 0.25, 0.125, 0.0, 0.75, 0.625] }
+
+  //   start_time = srise + day_dur * offsets[option][weekday]
+  //   end_time = start_time + 0.125 * day_dur
+
+  //   # to local timezone
+  //   start_time = (start_time - jd) * 24 + tz
+  //   end_time = (end_time - jd) * 24 + tz
+  //   return [to_dms(start_time), to_dms(end_time)] # decimal hours to H:M:S
+
+  // rahu_kalam = lambda jd, place: trikalam(jd, place, 'rahu')
+  // yamaganda_kalam = lambda jd, place: trikalam(jd, place, 'yamaganda')
+  // gulika_kalam = lambda jd, place: trikalam(jd, place, 'gulika')
+
+  // def durmuhurtam(jd, place):
+  //   lat, lon, tz = place
+  //   tz = place.timezone
+
+  //   # Night = today's sunset to tomorrow's sunrise
+  //   sset = swe.rise_trans(jd - tz/24, swe.SUN, lon, lat, rsmi = _rise_flags + swe.CALC_SET)[1][0]
+  //   srise = swe.rise_trans((jd + 1) - tz/24, swe.SUN, lon, lat, rsmi = _rise_flags + swe.CALC_RISE)[1][0]
+  //   night_dur = (srise - sset)
+
+  //   # Day = today's sunrise to today's sunset
+  //   srise = swe.rise_trans(jd - tz/24, swe.SUN, lon, lat, rsmi = _rise_flags + swe.CALC_RISE)[1][0]
+  //   day_dur = (sset - srise)
+
+  //   weekday = vaara(jd)
+
+  //   # There is one durmuhurtam on Sun, Wed, Sat; the rest have two
+  //   offsets = [[10.4, 0.0],  # Sunday
+  //              [6.4, 8.8],   # Monday
+  //              [2.4, 4.8],   # Tuesday, [day_duration , night_duration]
+  //              [5.6, 0.0],   # Wednesday
+  //              [4.0, 8.8],   # Thursday
+  //              [2.4, 6.4],   # Friday
+  //              [1.6, 0.0]]   # Saturday
+
+  //   # second durmuhurtam of tuesday uses night_duration instead of day_duration
+  //   dur = [day_dur, day_dur]
+  //   base = [srise, srise]
+  //   if weekday == 2:  dur[1] = night_dur; base[1] = sset
+
+  //   # compute start and end timings
+  //   start_times = [0, 0]
+  //   end_times = [0, 0]
+  //   for i in range(0, 2):
+  //     offset = offsets[weekday][i]
+  //     if offset != 0.0:
+  //       start_times[i] = base[i] + dur[i] * offsets[weekday][i] / 12
+  //       end_times[i] = start_times[i] + day_dur * 0.8 / 12
+
+  //       # convert to local time
+  //       start_times[i] = (start_times[i] - jd) * 24 + tz
+  //       end_times[i] = (end_times[i] - jd) * 24 + tz
+
+  //   return [start_times, end_times]  # in decimal hours
+
+  // def abhijit_muhurta(jd, place):
+  //   """Abhijit muhurta is the 8th muhurta (middle one) of the 15 muhurtas
+  //   during the day_duration (~12 hours)"""
+  //   lat, lon, tz = place
+  //   tz = place.timezone
+  //   srise = swe.rise_trans(jd - tz/24, swe.SUN, lon, lat, rsmi = _rise_flags + swe.CALC_RISE)[1][0]
+  //   sset = swe.rise_trans(jd - tz/24, swe.SUN, lon, lat, rsmi = _rise_flags + swe.CALC_SET)[1][0]
+  //   day_dur = (sset - srise)
+
+  //   start_time = srise + 7 / 15 * day_dur
+  //   end_time = srise + 8 / 15 * day_dur
+
+  //   # to local time
+  //   return [(start_time - jd) * 24 + tz, (end_time - jd) * 24 + tz]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
