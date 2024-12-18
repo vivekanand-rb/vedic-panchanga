@@ -245,7 +245,7 @@ export class PanchangService {
     tithiObj['substituionValue'] = (currentMoonLong - currentSunLong);
     tithiObj['phase'] = tithiObj['substituionValue'] < 0 ? (360 + tithiObj['substituionValue']) : tithiObj['substituionValue'];
     tithiObj['tithi'] = Math.ceil(tithiObj['phase'] / 12);
-    tithiObj['degreesLeft'] = (tithiObj['tithi'] * 12) - tithiObj['phase'];  /* <-- degree in radian */
+    tithiObj['degreesLeft'] = (tithiObj['tithi'] * 12) - tithiObj['phase'];  /* degree in radian */
 
     let relativeMotion: Array<number> = offsets.map((t) => {
       let moonRelativeSubstitution: number = this.getMoonLatLong(dateObj['astroDate'].AddDays(t))['elon'] - this.getMoonLatLong(dateObj['astroDate'])['elon'];
@@ -420,8 +420,49 @@ export class PanchangService {
   getAayamsha(date: Date, correctionIndex: number = 0): number {
     const correctionSystem: [{ [key: string]: any }] = [{ '0': 'lahiri', 'startYear': 285, 'movement': 50.2791, 'zeroAyanamsaVernalEquinoxDate': new Date("Sun Mar 22 0285 15:57:0 GMT") }];
     correctionIndex = correctionIndex > correctionSystem.length ? 0 : correctionIndex;
+    console.log('aynamsh.................',this.vernalPointLongitudeChange(this.getAstroDate(correctionSystem[correctionIndex]['zeroAyanamsaVernalEquinoxDate']), this.getAstroDate(date)))
     return this.vernalPointLongitudeChange(this.getAstroDate(correctionSystem[correctionIndex]['zeroAyanamsaVernalEquinoxDate']), this.getAstroDate(date));
   }
+
+  constants = {
+    lahiri: 2415020.0,
+    faganBradley: 2415020.0,
+    krishnamurti: 2415020.0,
+    yukteswar: 2415020.0,
+    deva: 2415020.0,
+    raman: 2415020.0
+  };
+
+  
+  // Constants for Lahiri Ayanamsha calculation
+const JD_EPOCH = 2415020.0;  // Julian Date of the epoch 1900-01-01
+const LAHIRI_CONSTANT = 2415020.0;  // Lahiri Ayanamsha constant
+
+// Function to calculate Julian Date from Gregorian Date (dd-mm-yyyy)
+toJulianDate(day: number, month: number, year: number): number {
+    const a = Math.floor((14 - month) / 12);
+    const y = year + 4800 - a;
+    const m = month + 12 * a - 3;
+    const jdn = day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+    return jdn;
+}
+
+// Function to calculate Ayanamsha (Lahiri)
+calculateAyanamsha(day: number, month: number, year: number): number {
+    // Calculate the Julian Date for the given date
+    const jd = this.toJulianDate(day, month, year);
+
+    // Calculate the number of Julian centuries since the J2000.0
+    const T = (jd - 2451545.0) / 36525;
+
+    // Calculate the Ayanamsha using Lahiri's formula
+    const ayanamsha = LAHIRI_CONSTANT + (0.0000167 * T) + (0.0000000003 * T * T);
+
+    return ayanamsha;
+}
+
+
+
 
   /* tested */
   convertHoursToMilliseconds(hours: number): { millisec: number, HrMinSec: Array<number> } {
