@@ -417,51 +417,97 @@ export class PanchangService {
     return (sphere.lon > 180) ? (360 - sphere.lon) : sphere.lon;
   }
 
+  /* tested */
   getAayamsha(date: Date, correctionIndex: number = 0): number {
-    const correctionSystem: [{ [key: string]: any }] = [{ '0': 'lahiri', 'startYear': 285, 'movement': 50.2791, 'zeroAyanamsaVernalEquinoxDate': new Date("Sun Mar 22 0285 15:57:0 GMT") }];
-    correctionIndex = correctionIndex > correctionSystem.length ? 0 : correctionIndex;
-    console.log('aynamsh.................',this.vernalPointLongitudeChange(this.getAstroDate(correctionSystem[correctionIndex]['zeroAyanamsaVernalEquinoxDate']), this.getAstroDate(date)))
-    return this.vernalPointLongitudeChange(this.getAstroDate(correctionSystem[correctionIndex]['zeroAyanamsaVernalEquinoxDate']), this.getAstroDate(date));
-  }
+ 
+    const correctionSystem: { [key: string]: any } = {
+      0: {
+        system: 'lahiri',
+        referenceYear: 285,
+        referenceAyanamsha: 23.85675,
+        tropicalYear: 365.2425,
+        precessionRate: 50.290966,
+        approxAyanamsaVernalEquinoxDate: new Date(285, 2, 21),
+        computationRequired: true
+      },
+      1:{
+        system: 'krishnamurti',
+        referenceYear: 291,
+        referenceAyanamsha: 23.85724,
+        tropicalYear: 365.2425,
+        precessionRate: 50.290966,
+        approxAyanamsaVernalEquinoxDate: new Date(291, 2, 21),
+        computationRequired: true
+      },
+      2:{
+        system: 'raman',
+        referenceYear: 397,
+        referenceAyanamsha: 22.37076,
+        tropicalYear: 365.2425,
+        precessionRate: 50.290966,
+        approxAyanamsaVernalEquinoxDate: new Date(397, 2, 21),
+        computationRequired: true,
+        
+      },
+      3:{
+        system: 'fagan-bradley',
+        referenceYear: 221,
+        referenceAyanamsha: 24.04224,
+        tropicalYear: 365.2425,
+        precessionRate: 50.290966,
+        approxAyanamsaVernalEquinoxDate: new Date(221, 2, 21),
+        computationRequired: true
+      },
+      4:{
+        system: 'deluce',
+        referenceYear: 499,
+        referenceAyanamsha: 21.01356,
+        tropicalYear: 365.2425,
+        precessionRate: 50.290966,
+        approxAyanamsaVernalEquinoxDate: new Date(499, 2, 21),
+        computationRequired: true
+      },
+      5:{
+        system: 'yukteshwar',
+        referenceYear: 1894,
+        referenceAyanamsha: 0,
+        tropicalYear: 365.2425,
+        precessionRate: 50.290966,
+        approxAyanamsaVernalEquinoxDate: new Date(1894, 2, 21),
+        computationRequired: true
+      },
+      6:{
+        system: 'hipparchus',
+        referenceYear: -127,
+        referenceAyanamsha: 29.0,
+        tropicalYear: 365.2425,
+        precessionRate: 50.290966,
+        approxAyanamsaVernalEquinoxDate: new Date(-127, 2, 21),
+        computationRequired: true
+      },
+      7:{
+        system: 'aryabhata',
+        referenceYear: 499,
+        referenceAyanamsha: 23.6,
+        tropicalYear: 365.2425,
+        precessionRate: 50.290966,
+        approxAyanamsaVernalEquinoxDate: new Date(499, 2, 21),
+        computationRequired: true
+      },
+    };
+    
+    let selectedCorrectionSystem = correctionSystem[correctionIndex];
+    selectedCorrectionSystem = selectedCorrectionSystem ?? correctionSystem[0];
 
-  constants = {
-    lahiri: 2415020.0,
-    faganBradley: 2415020.0,
-    krishnamurti: 2415020.0,
-    yukteswar: 2415020.0,
-    deva: 2415020.0,
-    raman: 2415020.0
-  };
-
-  
-  // Constants for Lahiri Ayanamsha calculation
-const JD_EPOCH = 2415020.0;  // Julian Date of the epoch 1900-01-01
-const LAHIRI_CONSTANT = 2415020.0;  // Lahiri Ayanamsha constant
-
-// Function to calculate Julian Date from Gregorian Date (dd-mm-yyyy)
-toJulianDate(day: number, month: number, year: number): number {
-    const a = Math.floor((14 - month) / 12);
-    const y = year + 4800 - a;
-    const m = month + 12 * a - 3;
-    const jdn = day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
-    return jdn;
-}
-
-// Function to calculate Ayanamsha (Lahiri)
-calculateAyanamsha(day: number, month: number, year: number): number {
-    // Calculate the Julian Date for the given date
-    const jd = this.toJulianDate(day, month, year);
-
-    // Calculate the number of Julian centuries since the J2000.0
-    const T = (jd - 2451545.0) / 36525;
-
-    // Calculate the Ayanamsha using Lahiri's formula
-    const ayanamsha = LAHIRI_CONSTANT + (0.0000167 * T) + (0.0000000003 * T * T);
+    let ayanamsha = 0;
+    if(selectedCorrectionSystem.computationRequired){
+      ayanamsha = this.vernalPointLongitudeChange(this.getAstroDate(selectedCorrectionSystem.approxAyanamsaVernalEquinoxDate), this.getAstroDate(date));
+    }else{
+      ayanamsha = selectedCorrectionSystem.fixedValue
+    }
 
     return ayanamsha;
-}
-
-
+  }
 
 
   /* tested */
@@ -596,6 +642,9 @@ calculateAyanamsha(day: number, month: number, year: number): number {
   }
 
   getAbhijitMahuratam(sunRiseSetObj: { [key: string]: any }, dayDiffernce: { [key: string]: any }): { startTimeInMilliSec: number, endTimeInMilliSec: number, startTime: Date, endTime: Date } {
+    console.log('abijit....',new Date(sunRiseSetObj['rise']['date'].getTime() +((dayDiffernce['dayDurationInMilliSec']/2) - 1440000)),
+    new Date(sunRiseSetObj['rise']['date'].getTime() +((dayDiffernce['dayDurationInMilliSec']/2) + 1440000)))
+    
     const startTime = sunRiseSetObj['rise']['date'].getTime() + ((7 / 15) * dayDiffernce['dayDurationInMilliSec']);
     const endTime = sunRiseSetObj['rise']['date'].getTime() + ((8 / 15) * dayDiffernce['dayDurationInMilliSec']);
     const mahuratamObj = { startTimeInMilliSec: startTime, endTimeInMilliSec: endTime, startTime: new Date(startTime), endTime: new Date(endTime) };
@@ -689,6 +738,87 @@ calculateAyanamsha(day: number, month: number, year: number): number {
   }
 
   getVasa(tithiObj: { [key: string]: any }, vedicWeekDay: number): { [key: string]: any } {
+
+
+    // vara: number;  // Vara (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+  //   const shivavasaCycles = ["Agni", "Vayu", "Jala", "Prithvi"];
+  //   return shivavasaCycles[(nakshatra - 1) % 4];
+
+  //   const homahutiCycles = ["Agni", "Prithvi", "Vayu", "Jala"];
+  //     return homahutiCycles[(tithi - 1) % 4];
+
+  //   const bhadravasaLocations = [
+  //     "Patala", "Bhu", "Antariksha", "Divya" // Simplified example
+  //   ];
+  //   return bhadravasaLocations[(tithi - 1) % 4];
+
+  //   const shivavasaCycles = ["Agni", "Vayu", "Jala", "Prithvi"];
+  // return shivavasaCycles[(nakshatra - 1) % 4];
+
+
+  // const chandraDirections = [
+  //   "South-East", // Sunday
+  //   "South",      // Monday
+  //   "South-West", // Tuesday
+  //   "West",       // Wednesday
+  //   "North-West", // Thursday
+  //   "North",      // Friday
+  //   "North-East", // Saturday
+  // ];
+  // return chandraDirections[vara % 7];
+
+  // const rahuDirections = [
+  //   "East",       // 1st, 9th, 17th, 25th Tithi
+  //   "South-East", // 2nd, 10th, 18th, 26th Tithi
+  //   "South",      // 3rd, 11th, 19th, 27th Tithi
+  //   "South-West", // 4th, 12th, 20th, 28th Tithi
+  //   "West",       // 5th, 13th, 21st, 29th Tithi
+  //   "North-West", // 6th, 14th, 22nd, 30th Tithi
+  //   "North",      // 7th, 15th, 23rd
+  //   "North-East", // 8th, 16th, 24th
+  // ];
+  // return rahuDirections[(tithi - 1) % 8];
+
+
+  // kumbha chakra
+  // const directions = ["East", "South-East", "South", "South-West", "West", "North-West", "North", "North-East"];
+  // const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  // return days.map((day, index) => ({
+  //   day,
+  //   direction: directions[index % directions.length],
+  // }));
+
+
+
+//   const dishaShoolaDirections = [
+//     "East",       // Sunday
+//     "West",       // Monday
+//     "North",      // Tuesday
+//     "South",      // Wednesday
+//     "North-East", // Thursday
+//     "South-East", // Friday
+//     "North-West", // Saturday
+//   ];
+//   return dishaShoolaDirections[vara % 7];
+// }
+
+
+// const nakshatraShoolaDirections = [
+//   "East",       // Ashwini, Bharani, Krittika
+//   "South",      // Rohini, Mrigashira, Ardra
+//   "West",       // Punarvasu, Pushya, Ashlesha
+//   "North",      // Magha, Purva Phalguni, Uttara Phalguni
+//   "South-East", // Hasta, Chitra, Swati
+//   "North-West", // Vishakha, Anuradha, Jyeshtha
+//   "South-West", // Mula, Purva Ashadha, Uttara Ashadha
+//   "North-East", // Shravana, Dhanishta, Shatabhisha
+//   "East",       // Purva Bhadrapada, Uttara Bhadrapada, Revati
+// ];
+
+// // Group of 3 Nakshatras per direction
+// const groupIndex = Math.floor((nakshatra - 1) / 3);
+// return nakshatraShoolaDirections[groupIndex % nakshatraShoolaDirections.length];
+
     const shaivaVasaIndex = ((tithiObj['tithi'] * 2) + 5) / 7;
     const agniVasaIndex = (((tithiObj['tithi'] + 1) + (vedicWeekDay + 1)) - 4) / 3;
     return { shaivaVasaIndex, agniVasaIndex, tithiEndTime: tithiObj['tithiEnd'] };
