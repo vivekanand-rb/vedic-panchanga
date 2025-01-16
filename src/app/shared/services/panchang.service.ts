@@ -635,8 +635,9 @@ export class PanchangService {
       "abhijitMahuratam": this.getAbhijitMahuratam(this.panchangObj["sunRiseSet"], this.panchangObj["dayDuration"]),
       "chaughadiyaMahuratam": this.getChaughadiyaMahuratam(observer, this.panchangObj["sunRiseSet"], this.panchangObj["dayDuration"]),
       "trikalam": this.getTrikalam(this.panchangObj["sunRiseSet"], this.panchangObj["dayDuration"]),
-      "durMahuratam": this.getDurMahuratam(this.panchangObj["sunRiseSet"], this.panchangObj["dayDuration"], this.panchangObj["vedicDayObj"]["day"]),
-      "varjayam": this.getVarjayam(this.panchangObj["nakshatraObj"], this.panchangObj['date']['timeStamp'])
+      "durMahuratam": this.getDurMahuratam(this.panchangObj["sunRiseSet"], this.panchangObj["dayDuration"]),
+      "varjayam": this.getVarjayam(this.panchangObj["nakshatraObj"], this.panchangObj['date']['timeStamp']),
+      "amritGadiyas": this.getAmritGadiyas(this.panchangObj["nakshatraObj"], this.panchangObj['date']['timeStamp'])
     }
 
   }
@@ -718,7 +719,7 @@ export class PanchangService {
   }
 
  /*tested*/
-  getDurMahuratam(sunRiseSetObj: { [key: string]: any }, dayDiffernce: { [key: string]: any }, weekday: number) {
+  getDurMahuratam(sunRiseSetObj: { [key: string]: any }, dayDiffernce: { [key: string]: any }) {
 
     const vedicWeekDay = this.getVaara(sunRiseSetObj['rise']['date'], sunRiseSetObj['rise']['date'])["day"];
     const offsets =  [[37440000, 0], [23040000, 31680000], [8640000, 17280000], [20160000, 0], [14400000, 31680000], [8640000, 23040000], [5760000, 0]];
@@ -750,35 +751,112 @@ export class PanchangService {
     return dishashula[vedicWeekDay];
   }
 
+   /*tested*/
   getVarjayam(nakshatraObj: Array<{ [key: string]: any }>, todaysDateInMilliSec: number): Array<{ [key: string]: any }> {
     const startTimeBasedOnNakshatra: { [key: string]: any } = {
-      1: { name: 'Ashwini', time: 72000000 }, 2: { name: 'Bharani', time: 33696000 }, 3: { name: 'Krittika', time: 43200000 }, 4: { name: 'Rohini', time: 57600000 }, 5: { name: 'Mrigashira', time: 19296000 },
-      6: { name: 'Ardra', time: 29664000 }, 7: { name: 'Punarvasu', time: 43200000 }, 8: { name: 'Pushya', time: 28800000 }, 9: { name: 'Ashlesha', time: 44928000 }, 10: { name: 'Magha', time: 43200000 },
-      11: { name: 'Purva Phalguni', time: 28800000 }, 12: { name: 'Uttara Phalguni', time: 25632000 }, 13: { name: 'Hasta', time: 29664000 }, 14: { name: 'Chitra', time: 28800000 },
-      15: { name: 'Swati', time: 19296000 }, 16: { name: 'Vishakha', time: 19296000 }, 17: { name: 'Anuradha', time: 14400000 }, 18: { name: 'Jyeshtha', time: 19296000 }, 19: { name: 'Mula', time: 29664000 }, 20: { name: 'Purva Ashadha', time: 33696000 },
-      21: { name: 'Uttara Ashadha', time: 28800000 }, 22: { name: 'Shravana', time: 14400000 }, 23: { name: 'Dhanishtha', time: 14400000 }, 24: { name: 'Shatabhishak', time: 25632000 },
-      25: { name: 'Purva Bhadrapada', time: 22464000 }, 26: { name: 'Uttara Bhadrapada', time: 33696000 }, 27: { name: 'Revati', time: 43200000 }
-    };
+      1: { name: 'Ashwini', time: 72000000 },
+      2: { name: 'Bharani', time: 34560000 },
+      3: { name: 'Krittika', time: 43200000 },
+      4: { name: 'Rohini', time: 57600000 },
+      5: { name: 'Mrigashira', time: 20160000 },
+      6: { name: 'Ardra', time: 30240000 },
+      7: { name: 'Punarvasu', time: 43200000 },
+      8: { name: 'Pushya', time: 28800000 },
+      9: { name: 'Ashlesha', time: 46080000 },
+      10: { name: 'Magha', time: 43200000 },
+      11: { name: 'Purva Phalguni', time: 28800000 },
+      12: { name: 'Uttara Phalguni', time: 25920000 },
+      13: { name: 'Hasta', time: 30240000 },
+      14: { name: 'Chitra', time: 28800000 },
+      15: { name: 'Swati', time: 20160000 },
+      16: { name: 'Vishakha', time: 20160000 },
+      17: { name: 'Anuradha', time: 14400000 },
+      18: { name: 'Jyeshtha', time: 20160000 },
+      19: { name: 'Mula', time: [28800000, 80640000] },
+      20: { name: 'Purva Ashadha', time: 34560000 },
+      21: { name: 'Uttara Ashadha', time: 28800000 },
+      22: { name: 'Shravana', time: 14400000 },
+      23: { name: 'Dhanishtha', time: 14400000 },
+      24: { name: 'Shatabhishak', time: 25920000 },
+      25: { name: 'Purva Bhadrapada', time: 23040000 },
+      26: { name: 'Uttara Bhadrapada', time: 34560000 },
+      27: { name: 'Revati', time: 43200000 }
+    }
 
     const varjayam: Array<{ [key: string]: any }> = [];
     nakshatraObj.map((nakshatra) => {
       let charanTimesInMilliSec = nakshatra['nakshatraCharana']['charanaTimes'].map((element: Date) => element.getTime());
       let durationOfNakshata = (charanTimesInMilliSec[0] - charanTimesInMilliSec[4]);
-      const startTime = charanTimesInMilliSec[4] + (startTimeBasedOnNakshatra[nakshatra['nakshatra']]['time'] / 86400000) * durationOfNakshata;
-      const endTime = startTime + (durationOfNakshata * (5760000 / 86400000));
-      varjayam.push({ startTime: new Date(startTime), endTime: new Date(endTime), isApplicableForToday: startTime >= todaysDateInMilliSec ? true : false });
+      if (nakshatra['nakshatra'] === 19) {
+        for (let i = 0; i < 2; i++) {
+          const startTime = charanTimesInMilliSec[4] + (startTimeBasedOnNakshatra[nakshatra['nakshatra']]['time'][i] / 86400000) * durationOfNakshata;
+          const endTime = startTime + (durationOfNakshata * (5760000 / 86400000));
+          const isApplicableForToday = (startTime >= todaysDateInMilliSec || endTime >= todaysDateInMilliSec) && (new Date(todaysDateInMilliSec).getDate() === new Date(startTime).getDate() || new Date(todaysDateInMilliSec).getDate() === new Date(endTime).getDate()) ? true : false
+          varjayam.push({ startTime: new Date(startTime), endTime: new Date(endTime), isApplicableForToday});
+        }
+      } else {
+        const startTime = charanTimesInMilliSec[4] + (startTimeBasedOnNakshatra[nakshatra['nakshatra']]['time'] / 86400000) * durationOfNakshata;
+        const endTime = startTime + (durationOfNakshata * (5760000 / 86400000));
+        const isApplicableForToday = (startTime >= todaysDateInMilliSec || endTime >= todaysDateInMilliSec) && (new Date(todaysDateInMilliSec).getDate() === new Date(startTime).getDate() || new Date(todaysDateInMilliSec).getDate() === new Date(endTime).getDate()) ? true : false
+        varjayam.push({ startTime: new Date(startTime), endTime: new Date(endTime), isApplicableForToday });
+      }
     });
 
-
-    console.log('varjayam.....,  ', varjayam)
-
+    //console.log('varjayam.....,  ', varjayam)
     return varjayam;
+  }
+
+
+  getAmritGadiyas(nakshatraObj: Array<{ [key: string]: any }>, todaysDateInMilliSec: number): Array<{ [key: string]: any }> {
+    const startTimeBasedOnNakshatra: { [key: string]: any } = {
+      1: { name: 'Ashwini', time: 60480000 },
+      2: { name: 'Bharani', time: 69120000 },
+      3: { name: 'Krittika', time: 77760000 },
+      4: { name: 'Rohini', time: 74880000 },
+      5: { name: 'Mrigashira', time: 54720000 },
+      6: { name: 'Ardra', time: 50400000 },
+      7: { name: 'Punarvasu', time: 77760000 },
+      8: { name: 'Pushya', time: 63360000 },
+      9: { name: 'Ashlesha', time: 80640000 },
+      10: { name: 'Magha', time: 77760000 },
+      11: { name: 'Purva Phalguni', time: 63360000 },
+      12: { name: 'Uttara Phalguni', time: 60480000 },
+      13: { name: 'Hasta', time: 64800000 },
+      14: { name: 'Chitra', time: 63360000 },
+      15: { name: 'Swati', time: 54720000 },
+      16: { name: 'Vishakha', time: 54720000 },
+      17: { name: 'Anuradha', time: 48960000 },
+      18: { name: 'Jyeshtha', time: 54720000 },
+      19: { name: 'Mula', time: 63360000 },
+      20: { name: 'Purva Ashadha', time: 69120000 },
+      21: { name: 'Uttara Ashadha', time: 63360000 },
+      22: { name: 'Shravana', time: 48960000 },
+      23: { name: 'Dhanishtha', time: 48960000 },
+      24: { name: 'Shatabhishak', time: 60480000 },
+      25: { name: 'Purva Bhadrapada', time: 57600000 },
+      26: { name: 'Uttara Bhadrapada', time: 69120000 },
+      27: { name: 'Revati', time: 77760000 }
+    }
+
+    const amritGadiyas: Array<{ [key: string]: any }> = [];
+    nakshatraObj.map((nakshatra) => {
+      let charanTimesInMilliSec = nakshatra['nakshatraCharana']['charanaTimes'].map((element: Date) => element.getTime());
+      let durationOfNakshata = (charanTimesInMilliSec[0] - charanTimesInMilliSec[4]);
+        const startTime = charanTimesInMilliSec[4] + (startTimeBasedOnNakshatra[nakshatra['nakshatra']]['time'] / 86400000) * durationOfNakshata;
+        const endTime = startTime + (durationOfNakshata * (5760000 / 86400000));
+        const isApplicableForToday = (startTime >= todaysDateInMilliSec || endTime >= todaysDateInMilliSec) && (new Date(todaysDateInMilliSec).getDate() === new Date(startTime).getDate() || new Date(todaysDateInMilliSec).getDate() === new Date(endTime).getDate()) ? true : false
+        amritGadiyas.push({ startTime: new Date(startTime), endTime: new Date(endTime), isApplicableForToday  });
+      
+    });
+
+    // console.log('amritGadiyas.....,  ', amritGadiyas)
+    return amritGadiyas;
   }
 
   getVasa(tithiObj: { [key: string]: any }, vedicWeekDay: number): { [key: string]: any } {
 
 
-    // vara: number;  // Vara (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    // vara: number;  // Vara (0 = Sunday, 1 = Monday, ..., 6 = Sarday)
   //   const shivavasaCycles = ["Agni", "Vayu", "Jala", "Prithvi"];
   //   return shivavasaCycles[(nakshatra - 1) % 4];
 
@@ -808,7 +886,7 @@ export class PanchangService {
   // const rahuDirections = [
   //   "East",       // 1st, 9th, 17th, 25th Tithi
   //   "South-East", // 2nd, 10th, 18th, 26th Tithi
-  //   "South",      // 3rd, 11th, 19th, 27th Tithi
+  //   "South",      // 3rd, 11th, 19th, 27th Tithitu
   //   "South-West", // 4th, 12th, 20th, 28th Tithi
   //   "West",       // 5th, 13th, 21st, 29th Tithi
   //   "North-West", // 6th, 14th, 22nd, 30th Tithi
