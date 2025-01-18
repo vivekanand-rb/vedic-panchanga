@@ -637,7 +637,8 @@ export class PanchangService {
       "trikalam": this.getTrikalam(this.panchangObj["sunRiseSet"], this.panchangObj["dayDuration"]),
       "durMahuratam": this.getDurMahuratam(this.panchangObj["sunRiseSet"], this.panchangObj["dayDuration"]),
       "varjayam": this.getVarjayam(this.panchangObj["nakshatraObj"], this.panchangObj['date']['timeStamp']),
-      "amritGadiyas": this.getAmritGadiyas(this.panchangObj["nakshatraObj"], this.panchangObj['date']['timeStamp'])
+      "amritGadiyas": this.getAmritGadiyas(this.panchangObj["nakshatraObj"], this.panchangObj['date']['timeStamp']),
+      "bramhaMahurata": this.getBramhaMahurta(this.panchangObj["sunRiseSet"])
     }
 
   }
@@ -851,6 +852,110 @@ export class PanchangService {
 
     // console.log('amritGadiyas.....,  ', amritGadiyas)
     return amritGadiyas;
+  }
+
+  getBramhaMahurta(sunRiseSetObj: { [key: string]: any }): { [key: string]: any }{
+    const startTime = sunRiseSetObj['rise']['date'].getTime()-5760000;
+    const endTime = sunRiseSetObj['rise']['date'].getTime();
+    return { startTime, endTime }
+  }
+
+  // https://www.prokerala.com/astrology/auspicious-yoga.php
+
+  getNakshatraYogas(): { [key: string]: any }{
+    const raviPushya = [{ nakshatra: 'Pushya', nakshatraIndex: 8 }, null, null, null, null, null, null];;
+    const guruPushya = [null, null, null, null, { nakshatra: 'Pushya', nakshatraIndex: 8 }, null, null];
+    const sarvarthaSiddhi = [
+      [{ nakshatra: 'Hasta', nakshatraIndex: 13 },
+      { nakshatra: 'Mula', nakshatraIndex: 19 },
+      { nakshatra: 'Uttara Phalguni', nakshatraIndex: 12 },
+      { nakshatra: 'Uttara Ashadha', nakshatraIndex: 21 },
+      { nakshatra: 'Uttara Bhadrapada', nakshatraIndex: 26 },
+      { nakshatra: 'Pushya', nakshatraIndex: 8 },
+      { nakshatra: 'Ashlesha', nakshatraIndex: 9 }],
+      [{ nakshatra: 'Shravana', nakshatraIndex: 22 },
+      { nakshatra: 'Rohini', nakshatraIndex: 4 },
+      { nakshatra: 'Mrigashira', nakshatraIndex: 5 },
+      { nakshatra: 'Pushya', nakshatraIndex: 8 },
+      { nakshatra: 'Anuradha', nakshatraIndex: 17 }],
+      [{ nakshatra: 'Ashwini', nakshatraIndex: 1 },
+      { nakshatra: 'Uttara Bhadrapada', nakshatraIndex: 26 },
+      { nakshatra: 'Krittika', nakshatraIndex: 3 },
+      { nakshatra: 'Ashlesha', nakshatraIndex: 9 }],
+      [{ nakshatra: 'Hasta', nakshatraIndex: 13 },
+      { nakshatra: 'Rohini', nakshatraIndex: 4 },
+      { nakshatra: 'Mrigashira', nakshatraIndex: 5 },
+      { nakshatra: 'Krittika', nakshatraIndex: 3 },
+      { nakshatra: 'Anuradha', nakshatraIndex: 17 }],
+      [{ nakshatra: 'Rohini', nakshatraIndex: 4 },
+      { nakshatra: 'Anuradha', nakshatraIndex: 17 },
+      { nakshatra: 'Hasta', nakshatraIndex: 13 },
+      { nakshatra: 'Krittika', nakshatraIndex: 3 },
+      { nakshatra: 'Mrigashira', nakshatraIndex: 5 }],
+      [{ nakshatra: 'Revati', nakshatraIndex: 27 },
+      { nakshatra: 'Anuradha', nakshatraIndex: 17 },
+      { nakshatra: 'Ashwini', nakshatraIndex: 1 },
+      { nakshatra: 'Punarvasu', nakshatraIndex: 7 },
+      { nakshatra: 'Pushya', nakshatraIndex: 8 }],
+      [{ nakshatra: 'Revati', nakshatraIndex: 27 },
+      { nakshatra: 'Anuradha', nakshatraIndex: 17 },
+      { nakshatra: 'Ashwini', nakshatraIndex: 1 },
+      { nakshatra: 'Punarvasu', nakshatraIndex: 7 },
+      { nakshatra: 'Shravana', nakshatraIndex: 22 }],
+      [{ nakshatra: 'Shravana', nakshatraIndex: 22 },
+      { nakshatra: 'Rohini', nakshatraIndex: 4 },
+      { nakshatra: 'Swati', nakshatraIndex: 15 }]
+    ];
+
+    const amritSiddhi = [
+      {nakshatra: 'Hasta', nakshatraIndex: 13},
+      {nakshatra: 'Mrigashira', nakshatraIndex: 5},
+      {nakshatra: 'Ashwini', nakshatraIndex: 1},
+      {nakshatra: 'Anuradha', nakshatraIndex: 17},
+      {nakshatra: 'Pushya', nakshatraIndex: 8},
+      {nakshatra: 'Revati', nakshatraIndex: 27},
+      {nakshatra: 'Rohini', nakshatraIndex: 4}
+    ];
+    const triPushkar = [
+      {
+        nakshatra: [{ nakshatra: 'Krittika', nakshatraIndex: 3 }, { nakshatra: 'Punarvasu', nakshatraIndex: 7 }, { nakshatra: 'Vishakha', nakshatraIndex: 16 }, { nakshatra: 'Uttara Ashadha', nakshatraIndex: 21 }, { nakshatra: 'Purva Bhadrapada', nakshatraIndex: 25 }],
+        tithi: [2,7,12]
+      },
+      null,    {
+                nakshatra: [{ nakshatra: 'Krittika', nakshatraIndex: 3 }, { nakshatra: 'Punarvasu', nakshatraIndex: 7 }, { nakshatra: 'Vishakha', nakshatraIndex: 16 }, { nakshatra: 'Uttara Ashadha', nakshatraIndex: 21 }, { nakshatra: 'Purva Bhadrapada', nakshatraIndex: 25 }],
+        tithi: []
+      }, null, null, null,    {
+                nakshatra: [{ nakshatra: 'Krittika', nakshatraIndex: 3 }, { nakshatra: 'Punarvasu', nakshatraIndex: 7 }, { nakshatra: 'Vishakha', nakshatraIndex: 16 }, { nakshatra: 'Uttara Ashadha', nakshatraIndex: 21 }, { nakshatra: 'Purva Bhadrapada', nakshatraIndex: 25 }],
+        tithi: []
+      }
+    ];
+    const dwiPushkar = [ {
+      nakshatra: [{nakshatra: 'Mrigashira', nakshatraIndex: 5}, {nakshatra: 'Chitra', nakshatraIndex: 14}, {nakshatra: 'Dhanishtha', nakshatraIndex: 23}],
+      tithi: [2,7,12]
+    },
+    null,    {
+      nakshatra: [{nakshatra: 'Mrigashira', nakshatraIndex: 5}, {nakshatra: 'Chitra', nakshatraIndex: 14}, {nakshatra: 'Dhanishtha', nakshatraIndex: 23}],
+      tithi: []
+    }, null, null, null,    {
+      nakshatra: [{nakshatra: 'Mrigashira', nakshatraIndex: 5}, {nakshatra: 'Chitra', nakshatraIndex: 14}, {nakshatra: 'Dhanishtha', nakshatraIndex: 23}],
+      tithi: []
+    }];
+
+    const jwalaMukhiTithis = {
+      1: { nakshatra: 'Mula', nakshatraIndex: 19 },
+      5: { nakshatra: 'Bharani', nakshatraIndex: 2 },
+      8: { nakshatra: 'Krittika', nakshatraIndex: 3 },
+      9: { nakshatra: 'Rohini', nakshatraIndex: 4 },
+      10: { nakshatra: 'Ashlesha', nakshatraIndex: 9 }
+    }
+
+    const moonPanchakYoga = {
+      sign: [11,12]
+    }
+
+
+    return {};
+
   }
 
   getVasa(tithiObj: { [key: string]: any }, vedicWeekDay: number): { [key: string]: any } {
